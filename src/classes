@@ -1,6 +1,10 @@
 Game
 	Player
-	showScoreboard()	
+	gameStartTime
+	reset()
+	durationOfGame()
+	showScoreboard()
+		
 Fun Cards
 	Description
 	Duration
