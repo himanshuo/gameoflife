@@ -1,0 +1,37 @@
+Game
+	Player
+	showScoreboard()	
+Fun Cards
+	Description
+	Duration
+	used boolean
+Task
+	id	
+	Task Name
+	Task Description
+	Acceptance Criteria
+	Failure Criteria
+	Deadline
+	Achievement Points to be earned or lost
+	SubTasks
+	Goal
+	enum progress
+	Recurring boolean
+	finish() - asks if acceptance/failure criteria met. checks deadline. checks subtasks. recursively calls on subtasks(). set progress to done.
+		can raise TaskUnfinished Exception
+Goals
+	Text
+Player
+	Name
+	Achiement Points
+	Himanshu Points
+	Fun Cards
+	Tasks
+	Goals
+	drawFunCard()
+	viewOpenTasks()
+	finishTask(Task) - Task.finish()->boolean success. If success += Achievement else -= 
+	updateTask(Task, Progress.NEW_STATUS)
+
+
+
