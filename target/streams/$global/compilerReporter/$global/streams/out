@@ -1,2 +1,11 @@
-[0m[[33mwarn[0m] [0mthere was one deprecation warning; re-run with -deprecation for details[0m
-[0m[[33mwarn[0m] [0mone warning found[0m
+[0m[[31merror[0m] [0m/home/himanshu/workspace/gameoflife/src/main/scala/models/TaskComparator.java:4: cannot find symbol[0m
+[0m[[31merror[0m] [0m  symbol: class Task[0m
+[0m[[31merror[0m] [0mTask[0m
+[0m[[31merror[0m] [0m/home/himanshu/workspace/gameoflife/src/main/scala/models/TaskComparator.java:6: cannot find symbol[0m
+[0m[[31merror[0m] [0m  symbol:   class Task[0m
+[0m[[31merror[0m] [0m  location: class TaskComparator[0m
+[0m[[31merror[0m] [0mTask[0m
+[0m[[31merror[0m] [0m/home/himanshu/workspace/gameoflife/src/main/scala/models/TaskComparator.java:6: cannot find symbol[0m
+[0m[[31merror[0m] [0m  symbol:   class Task[0m
+[0m[[31merror[0m] [0m  location: class TaskComparator[0m
+[0m[[31merror[0m] [0mTask[0m
