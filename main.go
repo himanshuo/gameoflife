@@ -10,12 +10,18 @@ import (
 
 )
 var Tasks []models.Task
+func init(){
+	Tasks = []models.Task{}
+}
 
 //views
 func Home(w http.ResponseWriter, r *http.Request){
 	
-	t, _ := template.ParseFiles("templates/base.html")
+	t, _ := template.ParseFiles("views/static/templates/base.html")
     t.Execute(w, Tasks)
+
+
+
 	
 
 }
@@ -27,6 +33,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request){
 	taskName := r.PostFormValue("name")
 	newTask := models.Task{Id: len(Tasks), Name: taskName}
 
+	Tasks = append(Tasks, newTask)
 
     if err := json.NewEncoder(w).Encode(newTask); err != nil {
         panic(err)
@@ -69,7 +76,9 @@ func main(){
     
 
    
-    
+    //static files
+    fs := http.FileServer(http.Dir("views/static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
     http.Handle("/", r)
     
