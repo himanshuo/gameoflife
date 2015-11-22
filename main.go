@@ -6,7 +6,7 @@ import (
 	"log"
 	"encoding/json"
 	"html/template"
-
+	"strconv"
 
 )
 var Tasks []models.Task
@@ -32,6 +32,19 @@ func CreateTask(w http.ResponseWriter, r *http.Request){
     }
 }
 
+func ViewTask(w http.ResponseWriter, r *http.Request){
+    taskId,_ := strconv.Atoi(r.FormValue("id"))
+    if err := json.NewEncoder(w).Encode(Tasks[taskId]); err != nil {
+        panic(err)
+    }
+}
+func ViewAllTasks(w http.ResponseWriter, r *http.Request){
+    if err := json.NewEncoder(w).Encode(Tasks); err != nil {
+        panic(err)
+    }
+}
+
+
 
 func main(){
 	r := mux.NewRouter()
@@ -48,8 +61,8 @@ func main(){
     s := r.PathPrefix("/task").Subrouter()
     s.HandleFunc("/", CreateTask).Methods("PUT")
     // s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST")
-    // s.HandleFunc("/", ViewAllTasks).Methods("GET")
-    // s.HandleFunc("/{id:[0-9]+}/", ViewTask).Methods("GET")
+    s.HandleFunc("/", ViewAllTasks).Methods("GET")
+    s.HandleFunc("/{id:[0-9]+}/", ViewTask).Methods("GET")
     // s.HandleFunc("/{id:[0-9]+}/", DeleteTask).Methods("DELETE")
     
 
