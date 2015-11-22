@@ -23,6 +23,7 @@ func Home(w http.ResponseWriter, r *http.Request){
 
 //API
 func CreateTask(w http.ResponseWriter, r *http.Request){
+	//note: r.FormValue searches for key in POST data fields, then PUT data fields
 	taskName := r.PostFormValue("name")
 	newTask := models.Task{Id: len(Tasks), Name: taskName}
 
@@ -33,6 +34,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request){
 }
 
 func ViewTask(w http.ResponseWriter, r *http.Request){
+	//note: r.FormValue searches for key in GET queries, then POST data fields, then PUT data fields
     taskId,_ := strconv.Atoi(r.FormValue("id"))
     if err := json.NewEncoder(w).Encode(Tasks[taskId]); err != nil {
         panic(err)
