@@ -12,6 +12,7 @@ import (
 	//database for  sql.Open
 	_ "github.com/mattn/go-sqlite3"  
 	"database/sql"
+	"fmt"
 
 )
 
@@ -35,10 +36,6 @@ func init(){
 		return
 	}
 	
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
 	
 
 	
@@ -67,8 +64,6 @@ func Home(w http.ResponseWriter, r *http.Request){
 	t, _ := template.ParseFiles("views/static/templates/base.html")
     t.Execute(w, Tasks)
 
-
-
 	
 
 }
@@ -77,8 +72,12 @@ func Home(w http.ResponseWriter, r *http.Request){
 //API
 func CreateTask(w http.ResponseWriter, r *http.Request){
 	//note: r.FormValue searches for key in POST data fields, then PUT data fields
-	taskName := r.PostFormValue("name")
+	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
+	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
+	//http://stackoverflow.com/a/4073451/4710047
 
+	taskName := r.PostFormValue("name")
+	fmt.Println(taskName)
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
@@ -88,14 +87,19 @@ func CreateTask(w http.ResponseWriter, r *http.Request){
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	_,err stmt.Exec(taskName)
+	resp,err := stmt.Exec(taskName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	tx.Commit()
 
-	newTask := models.Task{Id: tx.LastInsertId, Name: taskName}
+	new_task_id, err := resp.LastInsertId()
+	if err!=nil{
+		log.Fatal(err)
+	}
+
+	newTask := models.Task{Id: int(new_task_id), Name: taskName}
 
 
     if err := json.NewEncoder(w).Encode(newTask); err != nil {
@@ -126,6 +130,24 @@ func ViewTask(w http.ResponseWriter, r *http.Request){
 }
 
 func ViewAllTasks(w http.ResponseWriter, r *http.Request){
+	rows, err := db.Query("select id, name from Task")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+
+	Tasks := []models.Task{}
+
+	for rows.Next() {
+		var id int
+		var name string
+		rows.Scan(&id, &name)
+		cur_task := models.Task{Id:id, Name:name}
+		Tasks = append(Tasks, cur_task)
+	}
+	
+
     if err := json.NewEncoder(w).Encode(Tasks); err != nil {
         panic(err)
     }
@@ -170,6 +192,6 @@ func main(){
     
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
+	db.Close()
 
-	db.close()
 }
