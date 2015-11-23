@@ -27,7 +27,7 @@ func init(){
 	}
 	
 	sqlStmt := `
-		create table Task (id integer not null primary key, name text);
+		create table Task (id integer not null primary key autoincrement, name text);
 	`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -78,9 +78,25 @@ func Home(w http.ResponseWriter, r *http.Request){
 func CreateTask(w http.ResponseWriter, r *http.Request){
 	//note: r.FormValue searches for key in POST data fields, then PUT data fields
 	taskName := r.PostFormValue("name")
-	newTask := models.Task{Id: len(Tasks), Name: taskName}
 
-	Tasks = append(Tasks, newTask)
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := tx.Prepare("insert into Task(name) values(?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	_,err stmt.Exec(taskName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tx.Commit()
+
+	newTask := models.Task{Id: tx.LastInsertId, Name: taskName}
+
 
     if err := json.NewEncoder(w).Encode(newTask); err != nil {
         panic(err)
