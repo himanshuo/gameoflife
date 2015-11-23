@@ -14,11 +14,11 @@ import (
 	"database/sql"
 
 )
-var Tasks []models.Task
-var db sql.DB
+
+var db *sql.DB
 
 func init(){
-	Tasks = []models.Task{}
+	
 
 	var err error
 	db, err = sql.Open("sqlite3", "./data/data.db")
@@ -46,19 +46,23 @@ func init(){
 
 //views
 func Home(w http.ResponseWriter, r *http.Request){
-	
-	stmt, err := tx.Prepare("insert into foo(id, name) values(?, ?)")
+	rows, err := db.Query("select id, name from Task")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer stmt.Close()
-	for i := 0; i < 100; i++ {
-		_, err = stmt.Exec(i, fmt.Sprintf("こんにちわ世界%03d", i))
-		if err != nil {
-			log.Fatal(err)
-		}
+	defer rows.Close()
+
+
+	Tasks := []models.Task{}
+
+	for rows.Next() {
+		var id int
+		var name string
+		rows.Scan(&id, &name)
+		cur_task := models.Task{Id:id, Name:name}
+		Tasks = append(Tasks, cur_task)
 	}
-	tx.Commit()
+	
 
 	t, _ := template.ParseFiles("views/static/templates/base.html")
     t.Execute(w, Tasks)
