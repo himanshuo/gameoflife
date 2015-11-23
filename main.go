@@ -7,16 +7,59 @@ import (
 	"encoding/json"
 	"html/template"
 	"strconv"
+	//_ is in order to import a package solely for its side-effects at initialization. 
+	//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
+	//database for  sql.Open
+	_ "github.com/mattn/go-sqlite3"  
+	"database/sql"
 
 )
 var Tasks []models.Task
+var db sql.DB
+
 func init(){
 	Tasks = []models.Task{}
+
+	var err error
+	db, err = sql.Open("sqlite3", "./data/data.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	sqlStmt := `
+		create table Task (id integer not null primary key, name text);
+	`
+	_, err = db.Exec(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n", err, sqlStmt)
+		return
+	}
+	
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+
+	
 }
 
 //views
 func Home(w http.ResponseWriter, r *http.Request){
 	
+	stmt, err := tx.Prepare("insert into foo(id, name) values(?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	for i := 0; i < 100; i++ {
+		_, err = stmt.Exec(i, fmt.Sprintf("こんにちわ世界%03d", i))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	tx.Commit()
+
 	t, _ := template.ParseFiles("views/static/templates/base.html")
     t.Execute(w, Tasks)
 
@@ -56,7 +99,15 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request){
 
 
 func main(){
+
+	
+	
+
+
+
 	r := mux.NewRouter()
+
+
 
 	//views
     r.HandleFunc("/", Home)
@@ -84,4 +135,6 @@ func main(){
     
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
+
+	db.close()
 }
