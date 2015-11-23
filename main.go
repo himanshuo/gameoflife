@@ -106,10 +106,25 @@ func CreateTask(w http.ResponseWriter, r *http.Request){
 func ViewTask(w http.ResponseWriter, r *http.Request){
 	//note: r.FormValue searches for key in GET queries, then POST data fields, then PUT data fields
     taskId,_ := strconv.Atoi(r.FormValue("id"))
-    if err := json.NewEncoder(w).Encode(Tasks[taskId]); err != nil {
+    q := fmt.Sprintf("select id, name from Task where id=%d", taskId)
+
+    rows, err := db.Query(q)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	rows.Next()
+	var id int
+	var name string
+	rows.Scan(&id, &name)
+	cur_task := models.Task{Id:id, Name:name}
+    
+    if err := json.NewEncoder(w).Encode(cur_task); err != nil {
         panic(err)
     }
 }
+
 func ViewAllTasks(w http.ResponseWriter, r *http.Request){
     if err := json.NewEncoder(w).Encode(Tasks); err != nil {
         panic(err)
