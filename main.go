@@ -153,14 +153,36 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request){
     }
 }
 
+func DeleteTask(w http.ResponseWriter, r *http.Request){
+	taskId:= r.PostFormValue("id")
+	fmt.Println(taskName)
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	stmt, err := tx.Prepare("delete from Task where Task.id = ?", taskId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	resp,err := stmt.Exec(taskName)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-
-func main(){
-
+	tx.Commit()
 	
 	
+    if err := json.NewEncoder(w).Encode(newTask); err != nil {
+        panic(err)
+    }
+}
 
 
+
+
+
+func main(){	
 
 	r := mux.NewRouter()
 
@@ -180,7 +202,7 @@ func main(){
     // s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST")
     s.HandleFunc("/", ViewAllTasks).Methods("GET")
     s.HandleFunc("/{id:[0-9]+}/", ViewTask).Methods("GET")
-    // s.HandleFunc("/{id:[0-9]+}/", DeleteTask).Methods("DELETE")
+    s.HandleFunc("/{id:[0-9]+}/", DeleteTask).Methods("DELETE")
     
 
    
