@@ -1,6 +1,6 @@
 package main
 
-
+//todo: make sure using camelCase everywhere
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -51,61 +51,86 @@ func startDB() error{
 	return nil
 }
 
-//views
+//Views
+// Home page view. For now, simply lists all the tasks one by one.
 func Home(w http.ResponseWriter, r *http.Request) {
+	//get all tasks
 	rows, err := db.Query("select id, name from Task")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	Tasks := []models.Task{}
+	//list of tasks
+	tasks := []models.Task{}
 
+	//iterate through response
 	for rows.Next() {
 		var id int
 		var name string
+		//fill id and name variables with db output
 		rows.Scan(&id, &name)
+		//create new controller model for task
 		cur_task := models.Task{Id: id, Name: name}
-		Tasks = append(Tasks, cur_task)
+		//add model to tasks list
+		tasks = append(tasks, cur_task)
 	}
 
-	t, _ := template.ParseFiles("views/static/templates/base.html")
-	t.Execute(w, Tasks)
+	//choose which template to show user when this endpoint is called
+	t, err := template.ParseFiles("views/static/templates/base.html")
+	if err != nil{
+		log.Fatal(err)
+	}
+	//add tasks to template
+	//ASSUME that template is using the tasks properly
+	t.Execute(w, tasks)
 
 }
 
 //API
+//create a new task
+//input: name as part of a x-www-form-urlencoded PUT request
+//output: json encoded Task. Contains both id and name of newly created Task
 func CreateTask(w http.ResponseWriter, r *http.Request) {
 	//note: r.FormValue searches for key in POST data fields, then PUT data fields
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
 	//http://stackoverflow.com/a/4073451/4710047
 
+	//expecting to come from PUT data field
 	taskName := r.PostFormValue("name")
 
+	//start transaction
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// insert query
 	stmt, err := tx.Prepare("insert into Task(name) values(?)")
 	if err != nil {
 		log.Fatal(err)
 	}
+	//close statement
 	defer stmt.Close()
+	//execute statement
 	resp, err := stmt.Exec(taskName)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	//commit statement in db
 	tx.Commit()
 
-	new_task_id, err := resp.LastInsertId()
+	//get last inserted task id in order to show it to the user
+	//todo:  perhaps should do a query into the db to get the new Task
+	newTaskId, err := resp.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	newTask := models.Task{Id: int(new_task_id), Name: taskName}
+	//create new task model
+	newTask := models.Task{Id: int(newTaskId), Name: taskName}
 
+	//encode newTask as json, and return it to user.
 	if err := json.NewEncoder(w).Encode(newTask); err != nil {
 		panic(err)
 	}
@@ -116,66 +141,90 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
 	//http://stackoverflow.com/a/4073451/4710047
+	
+	//todo: log for whenever any of the api methods is called
+
 	log.Printf("called update task")
+	//create a variable that has the parameters sent to the api in the url 
+	// /task/<id>/<x>/  will lead to variables id and x in vars
 	vars := mux.Vars(r)
 
-	taskId, err := strconv.Atoi(vars["id"])
+	//todo: there should NOT be any newline between a command and its error validation
 
+	//get task id
+	taskId, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		log.Fatal(err)
 	}
+	//get new name from POST data form
 	newName := r.PostFormValue("name")
 
+	//start the transaction (do not have to close transaction, but do have to commit them)
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
+	//update query statement. 
 	stmt, err := tx.Prepare("UPDATE Task SET  name=? WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
+	//close statement
 	defer stmt.Close()
-	_, err = stmt.Exec(newName, taskId)
+	//check for errors. response does not give you the row that had the update so _
+	_, err := stmt.Exec(newName, taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	//commit the transaction
 	tx.Commit()
 
+	//todo: perhaps should be querying db for task. There could be db triggers and
+	//things that run internally
+
+	//create model for updated task
 	updatedTask := models.Task{Id: int(taskId), Name: newName}
 
+	//encode task as json and return to user
 	if err := json.NewEncoder(w).Encode(updatedTask); err != nil {
 		panic(err)
 	}
 }
 
+//view a single task
+//input: id of task as url parameter
+//output: json serialization of task with input id
 func ViewTask(w http.ResponseWriter, r *http.Request) {
 	//note: r.FormValue searches for key in GET queries, then POST data fields, then PUT data fields
 	log.Printf("view task called")
+	//create vars variable to access the url parameters
 	vars := mux.Vars(r)
 
+	//get id from url params
 	taskId, err := strconv.Atoi(vars["id"])
-	log.Printf(vars["id"])
-	log.Printf("%s", taskId)
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	q := fmt.Sprintf("select id, name from Task where id=%d", taskId)
-
-	rows, err := db.Query(q)
+	//query
+	rows, err := db.Query(("select id, name from Task where id=%d", taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
+	//close rows
 	defer rows.Close()
 
-	rows.Next()
+	//todo: make sure only one row is returned
+
 	var id int
 	var name string
+	//make row cursor point to first and only row
+	rows.Next()
+	//fill in id and name variables
 	rows.Scan(&id, &name)
+	//create task model with given id and name
 	cur_task := models.Task{Id: id, Name: name}
-	log.Printf("%v", cur_task)
+	//serialize task and then output it to user as json
 	if err := json.NewEncoder(w).Encode(cur_task); err != nil {
 		panic(err)
 	}
