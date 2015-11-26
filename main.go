@@ -32,7 +32,7 @@ func init(){
 	`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
+		log.Printf("%q", err)
 		return
 	}
 	
@@ -121,12 +121,12 @@ func UpdateTask(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("UPDATE Task SET  name=? WHERE id=?", newName, taskId)
+	stmt, err := tx.Prepare("UPDATE Task SET  name=? WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	resp,err := stmt.Exec(taskName)
+	_,err = stmt.Exec(newName, taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -136,9 +136,9 @@ func UpdateTask(w http.ResponseWriter, r *http.Request){
 	//updatedTask := models.Task{Id: int(new_task_id), Name: taskName}
 
 
-    if err := json.NewEncoder(w).Encode(newTask); err != nil {
-        panic(err)
-    }
+    // if err := json.NewEncoder(w).Encode(newTask); err != nil {
+    //     panic(err)
+    // }
 }
 
 func ViewTask(w http.ResponseWriter, r *http.Request){
@@ -189,17 +189,17 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request){
 
 func DeleteTask(w http.ResponseWriter, r *http.Request){
 	taskId:= r.PostFormValue("id")
-	fmt.Println(taskName)
+	
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("delete from Task where Task.id = ?", taskId)
+	stmt, err := tx.Prepare("delete from Task where Task.id = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	resp,err := stmt.Exec(taskName)
+	_,err = stmt.Exec(taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -207,9 +207,6 @@ func DeleteTask(w http.ResponseWriter, r *http.Request){
 	tx.Commit()
 	
 	
-    if err := json.NewEncoder(w).Encode(newTask); err != nil {
-        panic(err)
-    }
 }
 
 
