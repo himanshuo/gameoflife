@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -8,33 +9,46 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	//_ is in order to import a package solely for its side-effects at initialization.
-	//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
-	//database for  sql.Open
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 )
+//_ is in order to import a package solely for its side-effects at initialization.
+	//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
+	//database for  sql.Open
 
+//the database resource
 var db *sql.DB
 
+//run at start of program. 
 func init() {
 
+	startDB()
+
+}
+
+func startDB() error{
 	var err error
+	//sqlite 3 database is stored in /data/data.db file
 	db, err = sql.Open("sqlite3", "./data/data.db")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	sqlStmt := `
-		create table Task (id integer not null primary key autoincrement, name text);
-	`
+	//this makes sure we can actually query the database.
+	if err := db.Ping(); err != nil {
+  		return err
+	}
+	//ASSUMPTION: table exists in database
+	
+	//statement creates Task table which only has a PK id and name textfields
+	sqlStmt := "create table Task (id integer not null primary key autoincrement, name text);"
+	//run statement to create table. return object of Result type is not needed.
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
-		log.Printf("%q", err)
-		return
+		return err
 	}
-
+	return nil
 }
 
 //views
