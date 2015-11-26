@@ -75,9 +75,9 @@ func CreateTask(w http.ResponseWriter, r *http.Request){
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
 	//http://stackoverflow.com/a/4073451/4710047
-	fmt.Println(r)
+	
 	taskName := r.PostFormValue("name")
-	fmt.Println(taskName)
+	
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
@@ -113,8 +113,14 @@ func UpdateTask(w http.ResponseWriter, r *http.Request){
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
 	//http://stackoverflow.com/a/4073451/4710047
-
-	taskId := r.PostFormValue("id")
+	log.Printf("called update task")
+	 vars := mux.Vars(r)
+   
+	taskId, err := strconv.Atoi(vars["id"])
+	
+	if err != nil{
+		log.Fatal(err)
+	}
 	newName := r.PostFormValue("name")
 	
 	tx, err := db.Begin()
@@ -133,7 +139,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request){
 
 	tx.Commit()
 
-	updatedTask := models.Task{Id: int(new_task_id), Name: taskName}
+	updatedTask := models.Task{Id: int(taskId), Name: newName}
 
 
     if err := json.NewEncoder(w).Encode(updatedTask); err != nil {
@@ -143,7 +149,17 @@ func UpdateTask(w http.ResponseWriter, r *http.Request){
 
 func ViewTask(w http.ResponseWriter, r *http.Request){
 	//note: r.FormValue searches for key in GET queries, then POST data fields, then PUT data fields
-    taskId,_ := strconv.Atoi(r.FormValue("id"))
+    log.Printf("view task called")
+    vars := mux.Vars(r)
+   
+    taskId,err := strconv.Atoi(vars["id"])
+    log.Printf(vars["id"])
+    log.Printf("%s",taskId)
+    
+    if err != nil{
+    	log.Fatal(err)
+    }
+
     q := fmt.Sprintf("select id, name from Task where id=%d", taskId)
 
     rows, err := db.Query(q)
@@ -157,7 +173,7 @@ func ViewTask(w http.ResponseWriter, r *http.Request){
 	var name string
 	rows.Scan(&id, &name)
 	cur_task := models.Task{Id:id, Name:name}
-    
+    	log.Printf("%v", cur_task)
     if err := json.NewEncoder(w).Encode(cur_task); err != nil {
         panic(err)
     }
