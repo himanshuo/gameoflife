@@ -75,7 +75,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request){
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
 	//http://stackoverflow.com/a/4073451/4710047
-
+	fmt.Println(r)
 	taskName := r.PostFormValue("name")
 	fmt.Println(taskName)
 	tx, err := db.Begin()
