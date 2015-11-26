@@ -133,12 +133,12 @@ func UpdateTask(w http.ResponseWriter, r *http.Request){
 
 	tx.Commit()
 
-	//updatedTask := models.Task{Id: int(new_task_id), Name: taskName}
+	updatedTask := models.Task{Id: int(new_task_id), Name: taskName}
 
 
-    // if err := json.NewEncoder(w).Encode(newTask); err != nil {
-    //     panic(err)
-    // }
+    if err := json.NewEncoder(w).Encode(updatedTask); err != nil {
+         panic(err)
+     }
 }
 
 func ViewTask(w http.ResponseWriter, r *http.Request){
