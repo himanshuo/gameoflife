@@ -129,17 +129,7 @@ func TestCRUDTasks(t *testing.T){
     		t.Errorf("TestCRUDTasks invalid delete response %s", err)
     	}
     	
-	err = json.NewDecoder(resp.Body).Decode(&task)
-	if err != nil{
-		t.Errorf("TestCRUDTasks could not decode updated task %s", err)
-	}
-	if task.Id != id {
-		t.Errorf("TestCRUDTasks update task did not have correct id %d", task.Id)
-	}
-	if task.Name != name {
-		t.Errorf("TestCRUDTasks update task did not have correct name %d", task.Name)
-	}
-	//read task fails
+	
 	
 }
 
