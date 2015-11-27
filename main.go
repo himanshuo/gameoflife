@@ -230,24 +230,32 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//return a list of all tasks
 func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
+	//query for tasks
 	rows, err := db.Query("select id, name from Task")
 	if err != nil {
 		log.Fatal(err)
 	}
+	//close query
 	defer rows.Close()
 
-	Tasks := []models.Task{}
+	//empty task list model
+	tasks := []models.Task{}
 
+	//file up task list model with db output
 	for rows.Next() {
 		var id int
 		var name string
+		//fill id and name
 		rows.Scan(&id, &name)
+		//create model Task
 		cur_task := models.Task{Id: id, Name: name}
-		Tasks = append(Tasks, cur_task)
+		//add model task to list
+		tasks = append(Tasks, cur_task)
 	}
-
-	if err := json.NewEncoder(w).Encode(Tasks); err != nil {
+	//encode entire list as json and return it to user
+	if err := json.NewEncoder(w).Encode(tasks); err != nil {
 		panic(err)
 	}
 }
