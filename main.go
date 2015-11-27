@@ -1,33 +1,34 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/himanshuo/gameoflife/models"
+	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 )
+
 //_ is in order to import a package solely for its side-effects at initialization.
-	//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
-	//database for  sql.Open
+//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
+//database for  sql.Open
 
 //the database resource
 var db *sql.DB
 var Router *mux.Router
 
-//run at start of program. 
+//run at start of program.
 func init() {
-	
+
 	startDB()
 	Router = mux.NewRouter()
 
 }
 
-func startDB() error{
+func startDB() error {
 	var err error
 	//sqlite 3 database is stored in /data/data.db file
 	db, err = sql.Open("sqlite3", "./data/data.db")
@@ -37,11 +38,11 @@ func startDB() error{
 
 	//make sure we can actually query the database.
 	if err := db.Ping(); err != nil {
-  		return err
+		return err
 	}
 
 	//ASSUMPTION: table exists in database
-	
+
 	//statement creates Task table which only has a PK id and name textfields
 	sqlStmt := "create table Task (id integer not null primary key autoincrement, name text);"
 	//run statement to create table. return object of Result type is not needed.
@@ -81,7 +82,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 	//choose which template to show user when this endpoint is called
 	t, err := template.ParseFiles("views/static/templates/base.html")
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 	//add tasks to template
@@ -145,15 +146,11 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
 	//http://stackoverflow.com/a/4073451/4710047
-	
-	
 
 	log.Printf("Update Task")
-	//create a variable that has the parameters sent to the api in the url 
+	//create a variable that has the parameters sent to the api in the url
 	// /task/<id>/<x>/  will lead to variables id and x in vars
 	vars := mux.Vars(r)
-
-	
 
 	//get task id
 	taskId, err := strconv.Atoi(vars["id"])
@@ -168,7 +165,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//update query statement. 
+	//update query statement.
 	stmt, err := tx.Prepare("UPDATE Task SET  name=? WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
@@ -196,7 +193,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 //input: id of task as url parameter
 //output: json serialization of task with input id
 func ViewTask(w http.ResponseWriter, r *http.Request) {
-	
+
 	//note: r.FormValue searches for key in GET queries, then POST data fields, then PUT data fields
 	log.Printf("View Task")
 	//create vars variable to access the url parameters
@@ -244,10 +241,6 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 	//empty task list model
 	tasks := []models.Task{}
 
-	
-	
-	
-
 	//file up task list model with db output
 	for rows.Next() {
 		var id int
@@ -266,10 +259,10 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 }
 
 ///delete a task
-//input: task id in url 
+//input: task id in url
 //output: nothing
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
-	
+
 	log.Printf("Delete Task")
 	//create vars variable to access the url parameters
 	vars := mux.Vars(r)
@@ -303,8 +296,6 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	
-
 	//views
 	Router.HandleFunc("/", Home)
 
@@ -312,7 +303,6 @@ func main() {
 
 	//task
 
-	
 	s := Router.PathPrefix("/task").Subrouter()
 	s.HandleFunc("/", CreateTask).Methods("PUT").Name("CreateTaskUrl")
 	s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST").Name("UpdateTaskUrl")
@@ -329,8 +319,5 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
 	db.Close()
-	
-
-
 
 }

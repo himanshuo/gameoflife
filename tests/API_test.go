@@ -18,12 +18,12 @@ func TestHomeView(t *testing.T) {
 }
 
 //helper to view a given task
-func checkTask(t *testing.T, id int, name string){
+func checkTask(t *testing.T, id int, name string) {
 	resp, err := http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", id))
 	if err != nil {
 		t.Errorf("TestCRUDTasks got invalid read response %s: %s", err, resp)
 	}
-	
+
 	task := models.Task{}
 
 	err = json.NewDecoder(resp.Body).Decode(&task)
@@ -38,8 +38,9 @@ func checkTask(t *testing.T, id int, name string){
 	}
 
 }
+
 //helper to create a task given a name
-func createTask(t *testing.T, name string) models.Task{
+func createTask(t *testing.T, name string) models.Task {
 	task := models.Task{}
 	body := strings.NewReader(fmt.Sprintf("name=%s", name))
 
@@ -64,8 +65,9 @@ func createTask(t *testing.T, name string) models.Task{
 	return task
 
 }
-//helper to update a task given its id and a new name 
-func updateTask(t *testing.T, id int, newName string) models.Task{
+
+//helper to update a task given its id and a new name
+func updateTask(t *testing.T, id int, newName string) models.Task {
 
 	updateUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
 	body := strings.NewReader(fmt.Sprintf("name=%s", newName))
@@ -79,7 +81,7 @@ func updateTask(t *testing.T, id int, newName string) models.Task{
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid update response %s", err)
 	}
-	
+
 	task := models.Task{}
 
 	err = json.NewDecoder(resp.Body).Decode(&task)
@@ -94,8 +96,9 @@ func updateTask(t *testing.T, id int, newName string) models.Task{
 	}
 	return task
 }
+
 //helper to delete a task
-func deleteTask(t *testing.T, id int){
+func deleteTask(t *testing.T, id int) {
 	deleteUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
 	req, err := http.NewRequest("DELETE", deleteUrl, nil)
 	if err != nil {
@@ -110,22 +113,20 @@ func deleteTask(t *testing.T, id int){
 
 //test all crud options
 func TestCRUDTasks(t *testing.T) {
-	
+
 	name := "Test Task 1"
 	var id int
-	
 
 	//create task
 	task := createTask(t, name)
 	id = task.Id
-	
+
 	//read task
 	checkTask(t, id, name)
-	
+
 	//update task
 	name = "New Test Task Name 1"
 	task = updateTask(t, task.Id, name)
-
 
 	//read task
 	checkTask(t, id, name)
