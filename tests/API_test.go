@@ -16,6 +16,7 @@ func TestGetTasks(t *testing.T) {
 	}
 }
 
+//test all crud options
 func TestCRUDTasks(t *testing.T) {
 	//todo: a url_for(NAME) module would be helpful. I think the gorilla thing might already have it.
 	name := "Test Task 1"
@@ -24,6 +25,7 @@ func TestCRUDTasks(t *testing.T) {
 
 	//create task
 	body := strings.NewReader(fmt.Sprintf("name=%s", name))
+
 	req, err := http.NewRequest("PUT", "http://localhost:8080/task/",
 		body)
 	if err != nil {

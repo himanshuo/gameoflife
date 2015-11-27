@@ -12,6 +12,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/himanshuo/gameoflife/controller/apiclient"
 )
 //_ is in order to import a package solely for its side-effects at initialization.
 	//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
@@ -19,11 +20,14 @@ import (
 
 //the database resource
 var db *sql.DB
+var Router *mux.Router
 
 //run at start of program. 
 func init() {
 
 	startDB()
+	Router = mux.NewRouter()
+
 
 }
 
@@ -290,7 +294,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	//commit transaction
 	tx.Commit()
 
@@ -298,7 +302,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	r := mux.NewRouter()
+	
 
 	//views
 	r.HandleFunc("/", Home)
@@ -309,11 +313,11 @@ func main() {
 
 	//todo: can name each route in order to reverse them.
 	s := r.PathPrefix("/task").Subrouter()
-	s.HandleFunc("/", CreateTask).Methods("PUT")
-	s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST")
-	s.HandleFunc("/", ViewAllTasks).Methods("GET")
-	s.HandleFunc("/{id:[0-9]+}/", ViewTask).Methods("GET")
-	s.HandleFunc("/{id:[0-9]+}/", DeleteTask).Methods("DELETE")
+	s.HandleFunc("/", CreateTask).Methods("PUT").Name("CreateTaskUrl")
+	s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST").Name("UpdateTaskUrl")
+	s.HandleFunc("/", ViewAllTasks).Methods("GET").Name("ViewAllTasksUrl")
+	s.HandleFunc("/{id:[0-9]+}/", ViewTask).Methods("GET").Name("ViewTaskUrl")
+	s.HandleFunc("/{id:[0-9]+}/", DeleteTask).Methods("DELETE").Name("DeleteTaskUrl")
 
 	//static files
 	fs := http.FileServer(http.Dir("views/static"))
@@ -324,5 +328,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
 	db.Close()
+	apiclient.test()
+
+
 
 }
