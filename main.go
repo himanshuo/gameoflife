@@ -1,6 +1,5 @@
 package main
 
-//todo: make sure using camelCase everywhere
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -22,7 +21,7 @@ var Router *mux.Router
 
 //run at start of program. 
 func init() {
-	//todo: remove data.db from github. put into .gitignore 
+	
 	startDB()
 	Router = mux.NewRouter()
 
@@ -49,12 +48,14 @@ func startDB() error{
 	if err != nil {
 		return err
 	}
+	log.Printf("Database Started")
 	return nil
 }
 
 //Views
 // Home page view. For now, simply lists all the tasks one by one.
 func Home(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Home Screen Opened")
 	//get all tasks
 	rows, err := db.Query("select id, name from Task")
 	if err != nil {
@@ -72,9 +73,9 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		//fill id and name variables with db output
 		rows.Scan(&id, &name)
 		//create new controller model for task
-		cur_task := models.Task{Id: id, Name: name}
+		curTask := models.Task{Id: id, Name: name}
 		//add model to tasks list
-		tasks = append(tasks, cur_task)
+		tasks = append(tasks, curTask)
 	}
 
 	//choose which template to show user when this endpoint is called
@@ -93,6 +94,8 @@ func Home(w http.ResponseWriter, r *http.Request) {
 //input: name as part of a x-www-form-urlencoded PUT request
 //output: json encoded Task. Contains both id and name of newly created Task
 func CreateTask(w http.ResponseWriter, r *http.Request) {
+
+	log.Printf("Create Task")
 	//note: r.FormValue searches for key in POST data fields, then PUT data fields
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
@@ -145,7 +148,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	
 	//todo: log for whenever any of the api methods is called
 
-	log.Printf("called update task")
+	log.Printf("Update Task")
 	//create a variable that has the parameters sent to the api in the url 
 	// /task/<id>/<x>/  will lead to variables id and x in vars
 	vars := mux.Vars(r)
@@ -196,8 +199,9 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 //input: id of task as url parameter
 //output: json serialization of task with input id
 func ViewTask(w http.ResponseWriter, r *http.Request) {
+	
 	//note: r.FormValue searches for key in GET queries, then POST data fields, then PUT data fields
-	log.Printf("view task called")
+	log.Printf("View Task")
 	//create vars variable to access the url parameters
 	vars := mux.Vars(r)
 
@@ -224,15 +228,16 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 	//fill in id and name variables
 	rows.Scan(&id, &name)
 	//create task model with given id and name
-	cur_task := models.Task{Id: id, Name: name}
+	curTask := models.Task{Id: id, Name: name}
 	//serialize task and then output it to user as json
-	if err := json.NewEncoder(w).Encode(cur_task); err != nil {
+	if err := json.NewEncoder(w).Encode(curTask); err != nil {
 		panic(err)
 	}
 }
 
 //return a list of all tasks
 func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
+	log.Printf("View All Tasks")
 	//query for tasks
 	rows, err := db.Query("select id, name from Task")
 	if err != nil {
@@ -251,9 +256,9 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 		//fill id and name
 		rows.Scan(&id, &name)
 		//create model Task
-		cur_task := models.Task{Id: id, Name: name}
+		curTask := models.Task{Id: id, Name: name}
 		//add model task to list
-		tasks = append(tasks, cur_task)
+		tasks = append(tasks, curTask)
 	}
 	//encode entire list as json and return it to user
 	if err := json.NewEncoder(w).Encode(tasks); err != nil {
@@ -266,7 +271,7 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 //output: nothing
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	
-	log.Printf("view task called")
+	log.Printf("Delete Task")
 	//create vars variable to access the url parameters
 	vars := mux.Vars(r)
 
