@@ -10,9 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"database/sql"
-	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/himanshuo/gameoflife/controller/apiclient"
 )
 //_ is in order to import a package solely for its side-effects at initialization.
 	//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
@@ -28,7 +26,6 @@ func init() {
 	startDB()
 	Router = mux.NewRouter()
 
-
 }
 
 func startDB() error{
@@ -39,7 +36,7 @@ func startDB() error{
 		return err
 	}
 
-	//this makes sure we can actually query the database.
+	//make sure we can actually query the database.
 	if err := db.Ping(); err != nil {
   		return err
 	}
@@ -176,7 +173,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	//close statement
 	defer stmt.Close()
 	//check for errors. response does not give you the row that had the update so _
-	_, err := stmt.Exec(newName, taskId)
+	_, err = stmt.Exec(newName, taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -211,7 +208,7 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//query
-	rows, err := db.Query(("select id, name from Task where id=%d", taskId)
+	rows, err := db.Query("select id, name from Task where id=?", taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -256,7 +253,7 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 		//create model Task
 		cur_task := models.Task{Id: id, Name: name}
 		//add model task to list
-		tasks = append(Tasks, cur_task)
+		tasks = append(tasks, cur_task)
 	}
 	//encode entire list as json and return it to user
 	if err := json.NewEncoder(w).Encode(tasks); err != nil {
@@ -305,14 +302,14 @@ func main() {
 	
 
 	//views
-	r.HandleFunc("/", Home)
+	Router.HandleFunc("/", Home)
 
 	//API
 
 	//task
 
 	//todo: can name each route in order to reverse them.
-	s := r.PathPrefix("/task").Subrouter()
+	s := Router.PathPrefix("/task").Subrouter()
 	s.HandleFunc("/", CreateTask).Methods("PUT").Name("CreateTaskUrl")
 	s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST").Name("UpdateTaskUrl")
 	s.HandleFunc("/", ViewAllTasks).Methods("GET").Name("ViewAllTasksUrl")
@@ -323,12 +320,12 @@ func main() {
 	fs := http.FileServer(http.Dir("views/static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.Handle("/", r)
+	http.Handle("/", Router)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
 	db.Close()
-	apiclient.test()
+	
 
 
 

@@ -16,14 +16,30 @@ func TestGetTasks(t *testing.T) {
 	}
 }
 
-//test all crud options
-func TestCRUDTasks(t *testing.T) {
-	//todo: a url_for(NAME) module would be helpful. I think the gorilla thing might already have it.
-	name := "Test Task 1"
-	var id int
-	task := models.Task{}
 
-	//create task
+func checkTask(t *testing.T, id int, name string){
+	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", id))
+	if err != nil {
+		t.Errorf("TestCRUDTasks got invalid read response %s: %s", err, resp)
+	}
+	
+	task = models.Task{}
+
+	err = json.NewDecoder(resp.Body).Decode(&task)
+	if err != nil {
+		t.Errorf("TestCRUDTasks got invalid response %s", err)
+	}
+	if task.Id != id {
+		t.Errorf("TestCRUDTasks read got invalid id %s", task.Id)
+	}
+	if task.Name != name {
+		t.Errorf("TestCRUDTasks read got invalid name %s", task.Name)
+	}
+
+}
+
+func createTask(t *testing.T, name string) models.Task{
+	task := models.Task{}
 	body := strings.NewReader(fmt.Sprintf("name=%s", name))
 
 	req, err := http.NewRequest("PUT", "http://localhost:8080/task/",
@@ -44,29 +60,12 @@ func TestCRUDTasks(t *testing.T) {
 	if task.Name != name {
 		t.Errorf("TestCRUDTasks returned invalid name: %s, %s", task.Name, resp.Body)
 	}
-	id = task.Id
+	return task
 
-	//read task
-	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", id))
-	if err != nil {
-		t.Errorf("TestCRUDTasks got invalid read response %s: %s", err, resp)
-	}
-	//nullify task
-	task = models.Task{}
+}
 
-	err = json.NewDecoder(resp.Body).Decode(&task)
-	if err != nil {
-		t.Errorf("TestCRUDTasks got invalid response %s", err)
-	}
-	if task.Id != id {
-		t.Errorf("TestCRUDTasks read got invalid id %s", task.Id)
-	}
-	if task.Name != name {
-		t.Errorf("TestCRUDTasks read got invalid name %s", task.Name)
-	}
+func updateTask(t *testing.T, id int, name string) models.Task{
 
-	//update task
-	name = "New Test Task Name 1"
 	updateUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
 	body = strings.NewReader(fmt.Sprintf("name=%s", name))
 	req, err = http.NewRequest("POST", updateUrl, body)
@@ -79,7 +78,7 @@ func TestCRUDTasks(t *testing.T) {
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid update response %s", err)
 	}
-	//nullify task
+	
 	task = models.Task{}
 
 	err = json.NewDecoder(resp.Body).Decode(&task)
@@ -92,25 +91,30 @@ func TestCRUDTasks(t *testing.T) {
 	if task.Name != name {
 		t.Errorf("TestCRUDTasks update task did not have correct name %d", task.Name)
 	}
+	return task
+}
+
+//test all crud options
+func TestCRUDTasks(t *testing.T) {
+	//todo: a url_for(NAME) module would be helpful. I think the gorilla thing might already have it.
+	name := "Test Task 1"
+	var id int
+	
+
+	//create task
+	task := createTask(t, name)
+	id = task.Id
+	
+	//read task
+	checkTask(t, id, name)
+	
+	//update task
+	name = "New Test Task Name 1"
+	task = updateTask(t, name, task.Id)
+
 
 	//read task
-	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", id))
-	if err != nil {
-		t.Errorf("TestCRUDTasks got invalid read response %s: %s", err, resp)
-	}
-	//nullify task
-	task = models.Task{}
-
-	err = json.NewDecoder(resp.Body).Decode(&task)
-	if err != nil {
-		t.Errorf("TestCRUDTasks got invalid response %s", err)
-	}
-	if task.Id != id {
-		t.Errorf("TestCRUDTasks read got invalid id %s", task.Id)
-	}
-	if task.Name != name {
-		t.Errorf("TestCRUDTasks read got invalid name %s", task.Name)
-	}
+	checkTask(t, id, name)
 
 	//delete task
 	deleteUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
