@@ -9,21 +9,22 @@ import (
 	"testing"
 )
 
-func TestGetTasks(t *testing.T) {
+//test home view shows something
+func TestHomeView(t *testing.T) {
 	_, err := http.Get("http://localhost:8080/")
 	if err != nil {
 		t.Errorf("TestGetTasks Failed with err %s", err)
 	}
 }
 
-
+//helper to view a given task
 func checkTask(t *testing.T, id int, name string){
-	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", id))
+	resp, err := http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", id))
 	if err != nil {
 		t.Errorf("TestCRUDTasks got invalid read response %s: %s", err, resp)
 	}
 	
-	task = models.Task{}
+	task := models.Task{}
 
 	err = json.NewDecoder(resp.Body).Decode(&task)
 	if err != nil {
@@ -37,7 +38,7 @@ func checkTask(t *testing.T, id int, name string){
 	}
 
 }
-
+//helper to create a task given a name
 func createTask(t *testing.T, name string) models.Task{
 	task := models.Task{}
 	body := strings.NewReader(fmt.Sprintf("name=%s", name))
@@ -63,23 +64,23 @@ func createTask(t *testing.T, name string) models.Task{
 	return task
 
 }
-
-func updateTask(t *testing.T, id int, name string) models.Task{
+//helper to update a task given its id and a new name 
+func updateTask(t *testing.T, id int, newName string) models.Task{
 
 	updateUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
-	body = strings.NewReader(fmt.Sprintf("name=%s", name))
-	req, err = http.NewRequest("POST", updateUrl, body)
+	body := strings.NewReader(fmt.Sprintf("name=%s", newName))
+	req, err := http.NewRequest("POST", updateUrl, body)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid update request %s", err)
 	}
 
-	resp, err = http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid update response %s", err)
 	}
 	
-	task = models.Task{}
+	task := models.Task{}
 
 	err = json.NewDecoder(resp.Body).Decode(&task)
 	if err != nil {
@@ -88,10 +89,23 @@ func updateTask(t *testing.T, id int, name string) models.Task{
 	if task.Id != id {
 		t.Errorf("TestCRUDTasks update task did not have correct id %d", task.Id)
 	}
-	if task.Name != name {
+	if task.Name != newName {
 		t.Errorf("TestCRUDTasks update task did not have correct name %d", task.Name)
 	}
 	return task
+}
+//helper to delete a task
+func deleteTask(t *testing.T, id int){
+	deleteUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
+	req, err := http.NewRequest("DELETE", deleteUrl, nil)
+	if err != nil {
+		t.Errorf("TestCRUDTasks invalid delete request %s", err)
+	}
+
+	_, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Errorf("TestCRUDTasks invalid delete response %s", err)
+	}
 }
 
 //test all crud options
@@ -110,23 +124,14 @@ func TestCRUDTasks(t *testing.T) {
 	
 	//update task
 	name = "New Test Task Name 1"
-	task = updateTask(t, name, task.Id)
+	task = updateTask(t, task.Id, name)
 
 
 	//read task
 	checkTask(t, id, name)
 
 	//delete task
-	deleteUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
-	req, err = http.NewRequest("DELETE", deleteUrl, nil)
-	if err != nil {
-		t.Errorf("TestCRUDTasks invalid delete request %s", err)
-	}
-
-	resp, err = http.DefaultClient.Do(req)
-	if err != nil {
-		t.Errorf("TestCRUDTasks invalid delete response %s", err)
-	}
+	deleteTask(t, id)
 
 }
 
