@@ -22,7 +22,7 @@ var Router *mux.Router
 
 //run at start of program. 
 func init() {
-
+	//todo: remove data.db from github. put into .gitignore 
 	startDB()
 	Router = mux.NewRouter()
 
