@@ -39,6 +39,7 @@ func startDB() error{
 	if err := db.Ping(); err != nil {
   		return err
 	}
+
 	//ASSUMPTION: table exists in database
 	
 	//statement creates Task table which only has a PK id and name textfields
@@ -146,14 +147,14 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
 	//http://stackoverflow.com/a/4073451/4710047
 	
-	//todo: log for whenever any of the api methods is called
+	
 
 	log.Printf("Update Task")
 	//create a variable that has the parameters sent to the api in the url 
 	// /task/<id>/<x>/  will lead to variables id and x in vars
 	vars := mux.Vars(r)
 
-	//todo: there should NOT be any newline between a command and its error validation
+	
 
 	//get task id
 	taskId, err := strconv.Atoi(vars["id"])
@@ -313,7 +314,7 @@ func main() {
 
 	//task
 
-	//todo: can name each route in order to reverse them.
+	
 	s := Router.PathPrefix("/task").Subrouter()
 	s.HandleFunc("/", CreateTask).Methods("PUT").Name("CreateTaskUrl")
 	s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST").Name("UpdateTaskUrl")
