@@ -260,23 +260,38 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+///delete a task
+//input: task id in url 
+//output: nothing
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
-	taskId := r.PostFormValue("id")
+	
+	log.Printf("view task called")
+	//create vars variable to access the url parameters
+	vars := mux.Vars(r)
 
+	//get id from url params
+	taskId, err := strconv.Atoi(vars["id"])
+
+	//begin transaction
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
+	//begin statement
 	stmt, err := tx.Prepare("delete from Task where Task.id = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
+	//close statement
 	defer stmt.Close()
+
+	//execute statement with taskid
 	_, err = stmt.Exec(taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
+	//commit transaction
 	tx.Commit()
 
 }
