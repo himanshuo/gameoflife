@@ -126,7 +126,6 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	tx.Commit()
 
 	//get last inserted task id in order to show it to the user
-	//todo:  perhaps should do a query into the db to get the new Task
 	newTaskId, err := resp.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
@@ -184,9 +183,6 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	//commit the transaction
 	tx.Commit()
 
-	//todo: perhaps should be querying db for task. There could be db triggers and
-	//things that run internally
-
 	//create model for updated task
 	updatedTask := models.Task{Id: int(taskId), Name: newName}
 
@@ -220,8 +216,6 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 	//close rows
 	defer rows.Close()
 
-	//todo: make sure only one row is returned
-
 	var id int
 	var name string
 	//make row cursor point to first and only row
@@ -249,6 +243,10 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 
 	//empty task list model
 	tasks := []models.Task{}
+
+	
+	
+	
 
 	//file up task list model with db output
 	for rows.Next() {

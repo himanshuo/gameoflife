@@ -110,7 +110,7 @@ func deleteTask(t *testing.T, id int){
 
 //test all crud options
 func TestCRUDTasks(t *testing.T) {
-	//todo: a url_for(NAME) module would be helpful. I think the gorilla thing might already have it.
+	
 	name := "Test Task 1"
 	var id int
 	
