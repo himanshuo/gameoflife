@@ -75,7 +75,7 @@ func startDB() error {
 func Home(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Home Screen Opened")
 	//get all tasks
-	rows, err := db.Query("SELECT id, name FROM Task")
+	rows, err := db.Query("SELECT id, name FROM Task;")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("INSERT INTO Task(name) VALUES(?)")
+	stmt, err := tx.Prepare("INSERT INTO Task(name) VALUES(?);")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -150,7 +150,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("UPDATE Task SET name=? WHERE id=?")
+	stmt, err := tx.Prepare("UPDATE Task SET name=? WHERE id=?;")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -177,7 +177,7 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	row := db.QueryRow("SELECT id, name FROM Task WHERE id=?", taskId)
+	row := db.QueryRow("SELECT id, name FROM Task WHERE id=?;", taskId)
 	var id int
 	var name string
 	if err = row.Scan(&id, &name); err!=nil{
@@ -192,7 +192,7 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 //list all tasks
 func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 	log.Printf("View All Tasks")
-	rows, err := db.Query("SELECT id, name FROM Task")
+	rows, err := db.Query("SELECT id, name FROM Task;")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("DELETE FROM Task WHERE Task.id = ?")
+	stmt, err := tx.Prepare("DELETE FROM Task WHERE Task.id = ?;")
 	if err != nil {
 		log.Fatal(err)
 	}
