@@ -40,8 +40,7 @@ func init() {
 //set global db variable
 func startDB() error {
 	var err error
-	db, err = sql.Open(DB_TYPE, DB_DIR)
-	if err != nil {
+	if db, err = sql.Open(DB_TYPE, DB_DIR); err != nil{
 		return err
 	}
 	//make sure we can actually query the database.
@@ -75,8 +74,8 @@ func startDB() error {
 func Home(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Home Screen Opened")
 	//get all tasks
-	rows, err := db.Query("SELECT id, name FROM Task;")
-	if err != nil {
+	rows, err := db.Query("SELECT id, name FROM Task;"); 
+	if err != nil{
 		log.Fatal(err)
 	}
 	defer rows.Close()
@@ -91,7 +90,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		curTask := models.Task{Id: id, Name: name}
 		tasks = append(tasks, curTask)
 	}
-	t, err := template.ParseFiles(BASE_TEMPLATE)
+	t, err := template.ParseFiles(BASE_TEMPLATE); 
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,21 +110,21 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	//expecting to come from PUT data field
 	//name as part of a x-www-form-urlencoded PUT request
 	taskName := r.PostFormValue("name")
-	tx, err := db.Begin()
+	tx, err := db.Begin(); 
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("INSERT INTO Task(name) VALUES(?);")
+	stmt, err := tx.Prepare("INSERT INTO Task(name) VALUES(?);"); 
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	resp, err := stmt.Exec(taskName)
+	resp, err := stmt.Exec(taskName); 
 	if err != nil {
 		log.Fatal(err)
 	}
 	tx.Commit()
-	newTaskId, err := resp.LastInsertId()
+	newTaskId, err := resp.LastInsertId(); 
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,23 +140,22 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	//create a variable that has the parameters sent to the api in the url
 	// /task/<id>/<x>/  will lead to variables id and x in vars
 	vars := mux.Vars(r)
-	taskId, err := strconv.Atoi(vars["id"])
+	taskId, err := strconv.Atoi(vars["id"]); 
 	if err != nil {
 		log.Fatal(err)
 	}
 	newName := r.PostFormValue("name")
-	tx, err := db.Begin()
+	tx, err := db.Begin(); 
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("UPDATE Task SET name=? WHERE id=?;")
+	stmt, err := tx.Prepare("UPDATE Task SET name=? WHERE id=?;"); 
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 	// output is unneccessary
-	_, err = stmt.Exec(newName, taskId)
-	if err != nil {
+	if _, err = stmt.Exec(newName, taskId); err != nil {
 		log.Fatal(err)
 	}
 	tx.Commit()
