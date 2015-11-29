@@ -45,7 +45,7 @@ func createTask(t *testing.T, name string) models.Task {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		t.Errorf("could not create task: %$", err)
+		t.Errorf("could not create task: %s", err)
 	}
 	if err = json.NewDecoder(resp.Body).Decode(&task); err != nil {
 		t.Errorf("TestCRUDTasks got invalid response %s", err)
