@@ -1,30 +1,31 @@
 package tests
+
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/himanshuo/gameoflife/models"
 	"net/http"
+	"runtime"
 	"strings"
 	"testing"
-	"runtime"
 )
 
 //helper function in order to check errors
-func checkError(t *testing.T, err error){
-    	if err != nil {
-    		//get caller function
-		pc := make([]uintptr, 10)  // at least 1 entry needed
-	    	runtime.Callers(2, pc)
+func checkError(t *testing.T, err error) {
+	if err != nil {
+		//get caller function
+		pc := make([]uintptr, 10) // at least 1 entry needed
+		runtime.Callers(2, pc)
 		f := runtime.FuncForPC(pc[0])
-	    	_, line := f.FileLine(pc[0])
-	    	funcName := strings.Split(f.Name(),".")[1]
-		t.Errorf("[%s][line %d]:%s:%s", funcName, line, err)    		
-    	}
+		_, line := f.FileLine(pc[0])
+		funcName := strings.Split(f.Name(), ".")[1]
+		t.Errorf("[%s][line %d]:%s:%s", funcName, line, err)
+	}
 }
 
 //test home view shows something
 func TestHomeView(t *testing.T) {
-	_,err := http.Get("http://localhost:8080/")
+	_, err := http.Get("http://localhost:8080/")
 	checkError(t, err)
 }
 
