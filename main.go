@@ -79,7 +79,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	tasks := []models.Task{}
+	tasks := make([]models.Task, 10)
 	//iterate through response and put into models.Task slice
 	for rows.Next() {
 		var id int
@@ -195,7 +195,7 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	tasks := []models.Task{}
+	tasks := make([]models.Task, 10)
 	for rows.Next() {
 		var id int
 		var name string
