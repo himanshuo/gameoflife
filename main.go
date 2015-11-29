@@ -139,7 +139,7 @@ func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Update Task")
 	//create a variable that has the parameters sent to the api in the url
 	vars := mux.Vars(r)
-	// /task/<id>/<x>/  will lead to variables id and x in vars
+	//vars['id'] will always exist
 	taskId, err := strconv.Atoi(vars["id"]); 
 	if err != nil {
 		log.Fatal(err)
@@ -170,7 +170,7 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 	log.Printf("View Task")
 	//create vars variable to access the url parameters
 	vars := mux.Vars(r)
-	//id of task from url parameter
+	//id of task from url parameter. vars['id'] will always exist
 	taskId, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		log.Fatal(err)
@@ -214,7 +214,7 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Delete Task")
 	vars := mux.Vars(r)
-	//task id in url
+	//task id in url. vars["id"] will always exist
 	taskId, err := strconv.Atoi(vars["id"])
 	tx, err := db.Begin()
 	if err != nil {
