@@ -10,21 +10,22 @@ import (
 )
 
 //helper function in order to check errors
-func checkError(t *testing.T, format string, args ...interface{}){
-    	pc := make([]uintptr, 10)  // at least 1 entry needed
-    	runtime.Callers(2, pc)
-	f := runtime.FuncForPC(pc[0])
-    	file, line := f.FileLine(pc[0])
-    	fileNameParts := strings.Split(file,"/")
-    	fileName := fileNameParts[len(fileNameParts)-1]
-    	funcName := strings.Split(f.Name(),".")[1]
-	t.Errorf("[%s][%s][line %d]:%s\n", fileName, funcName, line, fmt.Sprintf(format, args...))
+func checkError(t *testing.T, err){
+    	if err != nil {
+    		//get caller function
+		pc := make([]uintptr, 10)  // at least 1 entry needed
+	    	runtime.Callers(2, pc)
+		f := runtime.FuncForPC(pc[0])
+	    	file, line := f.FileLine(pc[0])
+	    	funcName := strings.Split(f.Name(),".")[1]
+		t.Errorf("[%s][line %d]:%s:%s", funcName, line, err)    		
+    	}
 }
 
 //test home view shows something
 func TestHomeView(t *testing.T) {
 	_,err := http.Get("http://localhost:8080/")
-	checkError(t, "%s", err)
+	checkError(t, err)
 }
 
 // //helper to view a given task
