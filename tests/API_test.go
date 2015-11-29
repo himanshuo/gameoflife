@@ -1,5 +1,4 @@
 package tests
-
 import (
 	"encoding/json"
 	"fmt"
@@ -18,32 +17,28 @@ func TestHomeView(t *testing.T) {
 }
 
 //helper to view a given task
-func checkTask(t *testing.T, id int, name string) {
-	resp, err := http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", id))
+func readTask(t *testing.T, task models.Task) {
+	resp, err := http.Get(fmt.Sprintf("http://localhost:8080/task/%d/", task.Id))
 	if err != nil {
 		t.Errorf("TestCRUDTasks got invalid read response %s: %s", err, resp)
 	}
-
-	task := models.Task{}
-
-	err = json.NewDecoder(resp.Body).Decode(&task)
+	readTask := models.Task{}
+	err = json.NewDecoder(resp.Body).Decode(&readTask)
 	if err != nil {
 		t.Errorf("TestCRUDTasks got invalid response %s", err)
 	}
-	if task.Id != id {
-		t.Errorf("TestCRUDTasks read got invalid id %s", task.Id)
+	if readTask.Id != task.Id {
+		t.Errorf("TestCRUDTasks read got invalid id %s", readTask.Id)
 	}
-	if task.Name != name {
-		t.Errorf("TestCRUDTasks read got invalid name %s", task.Name)
+	if readTask.Name != task.Name {
+		t.Errorf("TestCRUDTasks read got invalid name %s", readTask.Name)
 	}
-
 }
 
 //helper to create a task given a name
 func createTask(t *testing.T, name string) models.Task {
 	task := models.Task{}
 	body := strings.NewReader(fmt.Sprintf("name=%s", name))
-
 	req, err := http.NewRequest("PUT", "http://localhost:8080/task/",
 		body)
 	if err != nil {
@@ -54,7 +49,6 @@ func createTask(t *testing.T, name string) models.Task {
 	if err != nil {
 		t.Errorf("could not create task: %$", err)
 	}
-
 	err = json.NewDecoder(resp.Body).Decode(&task)
 	if err != nil {
 		t.Errorf("TestCRUDTasks got invalid response %s", err)
@@ -67,44 +61,39 @@ func createTask(t *testing.T, name string) models.Task {
 }
 
 //helper to update a task given its id and a new name
-func updateTask(t *testing.T, id int, newName string) models.Task {
-
-	updateUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
-	body := strings.NewReader(fmt.Sprintf("name=%s", newName))
+func updateTask(t *testing.T, task models.Task) models.Task {
+	updateUrl := fmt.Sprintf("http://localhost:8080/task/%d/", task.Id)
+	body := strings.NewReader(fmt.Sprintf("name=%s", task.Name))
 	req, err := http.NewRequest("POST", updateUrl, body)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid update request %s", err)
 	}
-
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid update response %s", err)
 	}
-
-	task := models.Task{}
-
-	err = json.NewDecoder(resp.Body).Decode(&task)
+	updatedTask = models.Task{}
+	err = json.NewDecoder(resp.Body).Decode(&updatedTask)
 	if err != nil {
 		t.Errorf("TestCRUDTasks could not decode updated task %s", err)
 	}
-	if task.Id != id {
-		t.Errorf("TestCRUDTasks update task did not have correct id %d", task.Id)
+	if updatedTask.Id != task.Id {
+		t.Errorf("TestCRUDTasks update task did not have correct id %d", updatedTask.Id)
 	}
-	if task.Name != newName {
-		t.Errorf("TestCRUDTasks update task did not have correct name %d", task.Name)
+	if updatedTask.Name != task.Name {
+		t.Errorf("TestCRUDTasks update task did not have correct name %d", updatedTask.Name)
 	}
-	return task
+	return updatedTask
 }
 
 //helper to delete a task
-func deleteTask(t *testing.T, id int) {
-	deleteUrl := fmt.Sprintf("http://localhost:8080/task/%d/", id)
+func deleteTask(t *testing.T, task models.Task) {
+	deleteUrl := fmt.Sprintf("http://localhost:8080/task/%d/", task.Id)
 	req, err := http.NewRequest("DELETE", deleteUrl, nil)
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid delete request %s", err)
 	}
-
 	_, err = http.DefaultClient.Do(req)
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid delete response %s", err)
@@ -113,27 +102,12 @@ func deleteTask(t *testing.T, id int) {
 
 //test all crud options
 func TestCRUDTasks(t *testing.T) {
-
-	name := "Test Task 1"
-	var id int
-
-	//create task
-	task := createTask(t, name)
-	id = task.Id
-
-	//read task
-	checkTask(t, id, name)
-
-	//update task
-	name = "New Test Task Name 1"
-	task = updateTask(t, task.Id, name)
-
-	//read task
-	checkTask(t, id, name)
-
-	//delete task
+	task := createTask(t, "Test Task 1")
+	readTask(t, task)
+	task.Name = "Test Task 2"
+	task = updateTask(t, task)
+	readTask(t, task)
 	deleteTask(t, id)
-
 }
 
 // func TestCreateTasksWithSameName(t *testing.T){
