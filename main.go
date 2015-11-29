@@ -28,8 +28,12 @@ const (
 
 //start database and create a url router
 func init() {
-	startDB()
-	Router = mux.NewRouter()
+	if err := startDB(); err!=nil{
+		log.Fatal(err)
+	} else {
+		Router = mux.NewRouter()
+	}
+
 }
 
 // creates database if not already created. Creates DB tables if not already created.
@@ -44,13 +48,23 @@ func startDB() error {
 	if err := db.Ping(); err != nil {
 		return err
 	}
-	//ASSUMPTION: table exists in database
-	sqlStmt := "CREATE TABLE Task (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT);"
-	//run statement to create table. return object of Result type is not needed.
-	_, err = db.Exec(sqlStmt)
-	if err != nil {
-		return err
-	}
+	//make sure table actually exists in db
+	tableName := "Task"
+	checkTableQuery := "SELECT name FROM sqlite_master WHERE type='table' AND name=?;"
+	var output string
+	err = db.QueryRow(checkTableQuery, tableName).Scan(&output)
+    	switch {
+    		case err == sql.ErrNoRows:
+	            		log.Printf("Table %s does not exist. Creating it.", tableName)
+	            		sqlStmt := "CREATE TABLE Task (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT);"
+			//run statement to create table. return object of Result type is not needed.
+			_, err = db.Exec(sqlStmt)
+			if err != nil {
+				return err
+			}
+    		case err != nil:
+            			return err
+    	}
 	log.Printf("Database Started")
 	return nil
 }
@@ -71,7 +85,9 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var id int
 		var name string
-		rows.Scan(&id, &name)
+		if err = rows.Scan(&id, &name); err != nil{
+			log.Fatal(err)
+		}
 		curTask := models.Task{Id: id, Name: name}
 		tasks = append(tasks, curTask)
 	}
@@ -161,14 +177,12 @@ func ViewTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := db.QueryRow("SELECT id, name FROM Task WHERE id=?", taskId)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
+	row := db.QueryRow("SELECT id, name FROM Task WHERE id=?", taskId)
 	var id int
 	var name string
-	rows.Scan(&id, &name)
+	if err = row.Scan(&id, &name); err!=nil{
+		log.Fatal(err)
+	}
 	curTask := models.Task{Id: id, Name: name}
 	if err := json.NewEncoder(w).Encode(curTask); err != nil {
 		panic(err)
@@ -187,7 +201,9 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var id int
 		var name string
-		rows.Scan(&id, &name)
+		if err = rows.Scan(&id, &name); err!=nil{
+			log.Fatal(err)
+		}
 		curTask := models.Task{Id: id, Name: name}
 		tasks = append(tasks, curTask)
 	}
@@ -234,6 +250,7 @@ func main() {
 	fs := http.FileServer(http.Dir("views/static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.Handle("/", Router)
+	log.Printf("Server Started")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 	db.Close()
 }

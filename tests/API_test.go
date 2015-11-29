@@ -73,7 +73,7 @@ func updateTask(t *testing.T, task models.Task) models.Task {
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid update response %s", err)
 	}
-	updatedTask = models.Task{}
+	updatedTask := models.Task{}
 	err = json.NewDecoder(resp.Body).Decode(&updatedTask)
 	if err != nil {
 		t.Errorf("TestCRUDTasks could not decode updated task %s", err)
@@ -107,7 +107,7 @@ func TestCRUDTasks(t *testing.T) {
 	task.Name = "Test Task 2"
 	task = updateTask(t, task)
 	readTask(t, task)
-	deleteTask(t, id)
+	deleteTask(t, task)
 }
 
 // func TestCreateTasksWithSameName(t *testing.T){
