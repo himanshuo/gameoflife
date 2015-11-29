@@ -12,7 +12,7 @@ var TaskList = React.createClass({
 			React.createElement(
 				'div', 
 				{className: "tasklist"},
-				"!!HOW DO WE USE SOME OTHER VARIABLE??????!!"
+				"!!HOW DO WE USE SOME OTHER VARIABLE????!!"
 			)
 		)
 	}
