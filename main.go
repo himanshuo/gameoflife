@@ -138,8 +138,8 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Update Task")
 	//create a variable that has the parameters sent to the api in the url
-	// /task/<id>/<x>/  will lead to variables id and x in vars
 	vars := mux.Vars(r)
+	// /task/<id>/<x>/  will lead to variables id and x in vars
 	taskId, err := strconv.Atoi(vars["id"]); 
 	if err != nil {
 		log.Fatal(err)
