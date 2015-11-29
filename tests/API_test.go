@@ -10,8 +10,7 @@ import (
 
 //test home view shows something
 func TestHomeView(t *testing.T) {
-	_, err := http.Get("http://localhost:8080/")
-	if err != nil {
+	if _, err := http.Get("http://localhost:8080/"); err != nil {
 		t.Errorf("TestGetTasks Failed with err %s", err)
 	}
 }
@@ -23,8 +22,7 @@ func readTask(t *testing.T, task models.Task) {
 		t.Errorf("TestCRUDTasks got invalid read response %s: %s", err, resp)
 	}
 	readTask := models.Task{}
-	err = json.NewDecoder(resp.Body).Decode(&readTask)
-	if err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&readTask); err != nil {
 		t.Errorf("TestCRUDTasks got invalid response %s", err)
 	}
 	if readTask.Id != task.Id {
@@ -49,8 +47,7 @@ func createTask(t *testing.T, name string) models.Task {
 	if err != nil {
 		t.Errorf("could not create task: %$", err)
 	}
-	err = json.NewDecoder(resp.Body).Decode(&task)
-	if err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&task); err != nil {
 		t.Errorf("TestCRUDTasks got invalid response %s", err)
 	}
 	if task.Name != name {
@@ -74,8 +71,7 @@ func updateTask(t *testing.T, task models.Task) models.Task {
 		t.Errorf("TestCRUDTasks invalid update response %s", err)
 	}
 	updatedTask := models.Task{}
-	err = json.NewDecoder(resp.Body).Decode(&updatedTask)
-	if err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&updatedTask); err != nil {
 		t.Errorf("TestCRUDTasks could not decode updated task %s", err)
 	}
 	if updatedTask.Id != task.Id {
@@ -94,8 +90,7 @@ func deleteTask(t *testing.T, task models.Task) {
 	if err != nil {
 		t.Errorf("TestCRUDTasks invalid delete request %s", err)
 	}
-	_, err = http.DefaultClient.Do(req)
-	if err != nil {
+	if _, err = http.DefaultClient.Do(req); err != nil {
 		t.Errorf("TestCRUDTasks invalid delete response %s", err)
 	}
 }
