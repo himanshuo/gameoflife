@@ -1,5 +1,8 @@
 package main
 
+//_ is in order to import a package solely for its side-effects at initialization.
+//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
+//database for  sql.Open
 import (
 	"database/sql"
 	"encoding/json"
@@ -12,39 +15,37 @@ import (
 	"strconv"
 )
 
-//_ is in order to import a package solely for its side-effects at initialization.
-//In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
-//database for  sql.Open
-
-//the database resource
 var db *sql.DB
 var Router *mux.Router
 
-//run at start of program.
-func init() {
+const (
+	DB_TYPE = "sqlite3"
+	DB_DIR  = "./data/data.db"
+)
+const (
+	BASE_TEMPLATE = "views/static/templates/base.html"
+)
 
+//start database and create a url router
+func init() {
 	startDB()
 	Router = mux.NewRouter()
-
 }
 
+// creates database if not already created. Creates DB tables if not already created.
+//set global db variable
 func startDB() error {
 	var err error
-	//sqlite 3 database is stored in /data/data.db file
-	db, err = sql.Open("sqlite3", "./data/data.db")
+	db, err = sql.Open(DB_TYPE, DB_DIR)
 	if err != nil {
 		return err
 	}
-
 	//make sure we can actually query the database.
 	if err := db.Ping(); err != nil {
 		return err
 	}
-
 	//ASSUMPTION: table exists in database
-
-	//statement creates Task table which only has a PK id and name textfields
-	sqlStmt := "create table Task (id integer not null primary key autoincrement, name text);"
+	sqlStmt := "CREATE TABLE Task (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT);"
 	//run statement to create table. return object of Result type is not needed.
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -55,48 +56,36 @@ func startDB() error {
 }
 
 //Views
+
 // Home page view. For now, simply lists all the tasks one by one.
 func Home(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Home Screen Opened")
 	//get all tasks
-	rows, err := db.Query("select id, name from Task")
+	rows, err := db.Query("SELECT id, name FROM Task")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-
-	//list of tasks
 	tasks := []models.Task{}
-
-	//iterate through response
+	//iterate through response and put into models.Task slice
 	for rows.Next() {
 		var id int
 		var name string
-		//fill id and name variables with db output
 		rows.Scan(&id, &name)
-		//create new controller model for task
 		curTask := models.Task{Id: id, Name: name}
-		//add model to tasks list
 		tasks = append(tasks, curTask)
 	}
-
-	//choose which template to show user when this endpoint is called
-	t, err := template.ParseFiles("views/static/templates/base.html")
+	t, err := template.ParseFiles(BASE_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//add tasks to template
-	//ASSUME that template is using the tasks properly
 	t.Execute(w, tasks)
-
 }
 
 //API
-//create a new task
-//input: name as part of a x-www-form-urlencoded PUT request
-//output: json encoded Task. Contains both id and name of newly created Task
-func CreateTask(w http.ResponseWriter, r *http.Request) {
 
+//create a new task
+func CreateTask(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Create Task")
 	//note: r.FormValue searches for key in POST data fields, then PUT data fields
 	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
@@ -104,220 +93,147 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	//http://stackoverflow.com/a/4073451/4710047
 
 	//expecting to come from PUT data field
+	//name as part of a x-www-form-urlencoded PUT request
 	taskName := r.PostFormValue("name")
-
-	//start transaction
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// insert query
-	stmt, err := tx.Prepare("insert into Task(name) values(?)")
+	stmt, err := tx.Prepare("INSERT INTO Task(name) VALUES(?)")
 	if err != nil {
 		log.Fatal(err)
 	}
-	//close statement
 	defer stmt.Close()
-	//execute statement
 	resp, err := stmt.Exec(taskName)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//commit statement in db
 	tx.Commit()
-
-	//get last inserted task id in order to show it to the user
 	newTaskId, err := resp.LastInsertId()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//create new task model
 	newTask := models.Task{Id: int(newTaskId), Name: taskName}
-
-	//encode newTask as json, and return it to user.
 	if err := json.NewEncoder(w).Encode(newTask); err != nil {
 		panic(err)
 	}
 }
 
+//update a task
 func UpdateTask(w http.ResponseWriter, r *http.Request) {
-	//note: r.FormValue searches for key in POST data fields, then PUT data fields
-	//2 types of POST submissions: application/x-www-form-urlencoded AND multipart/form-data.
-	// need to understand both. Generally speaking, urlencoded takes up extra space so is for normal post requests. multipart form-data does not increase space usage by a lot so is for uploading files
-	//http://stackoverflow.com/a/4073451/4710047
-
 	log.Printf("Update Task")
 	//create a variable that has the parameters sent to the api in the url
 	// /task/<id>/<x>/  will lead to variables id and x in vars
 	vars := mux.Vars(r)
-
-	//get task id
 	taskId, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		log.Fatal(err)
 	}
-	//get new name from POST data form
 	newName := r.PostFormValue("name")
-
-	//start the transaction (do not have to close transaction, but do have to commit them)
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-	//update query statement.
-	stmt, err := tx.Prepare("UPDATE Task SET  name=? WHERE id=?")
+	stmt, err := tx.Prepare("UPDATE Task SET name=? WHERE id=?")
 	if err != nil {
 		log.Fatal(err)
 	}
-	//close statement
 	defer stmt.Close()
-	//check for errors. response does not give you the row that had the update so _
+	// output is unneccessary
 	_, err = stmt.Exec(newName, taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//commit the transaction
 	tx.Commit()
-
-	//create model for updated task
 	updatedTask := models.Task{Id: int(taskId), Name: newName}
-
-	//encode task as json and return to user
 	if err := json.NewEncoder(w).Encode(updatedTask); err != nil {
 		panic(err)
 	}
 }
 
 //view a single task
-//input: id of task as url parameter
-//output: json serialization of task with input id
 func ViewTask(w http.ResponseWriter, r *http.Request) {
-
-	//note: r.FormValue searches for key in GET queries, then POST data fields, then PUT data fields
 	log.Printf("View Task")
 	//create vars variable to access the url parameters
 	vars := mux.Vars(r)
-
-	//get id from url params
+	//id of task from url parameter
 	taskId, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//query
-	rows, err := db.Query("select id, name from Task where id=?", taskId)
+	rows, err := db.QueryRow("SELECT id, name FROM Task WHERE id=?", taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//close rows
 	defer rows.Close()
-
 	var id int
 	var name string
-	//make row cursor point to first and only row
-	rows.Next()
-	//fill in id and name variables
 	rows.Scan(&id, &name)
-	//create task model with given id and name
 	curTask := models.Task{Id: id, Name: name}
-	//serialize task and then output it to user as json
 	if err := json.NewEncoder(w).Encode(curTask); err != nil {
 		panic(err)
 	}
 }
 
-//return a list of all tasks
+//list all tasks
 func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 	log.Printf("View All Tasks")
-	//query for tasks
-	rows, err := db.Query("select id, name from Task")
+	rows, err := db.Query("SELECT id, name FROM Task")
 	if err != nil {
 		log.Fatal(err)
 	}
-	//close query
 	defer rows.Close()
-
-	//empty task list model
 	tasks := []models.Task{}
-
-	//file up task list model with db output
 	for rows.Next() {
 		var id int
 		var name string
-		//fill id and name
 		rows.Scan(&id, &name)
-		//create model Task
 		curTask := models.Task{Id: id, Name: name}
-		//add model task to list
 		tasks = append(tasks, curTask)
 	}
-	//encode entire list as json and return it to user
 	if err := json.NewEncoder(w).Encode(tasks); err != nil {
 		panic(err)
 	}
 }
 
 ///delete a task
-//input: task id in url
-//output: nothing
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
-
 	log.Printf("Delete Task")
-	//create vars variable to access the url parameters
 	vars := mux.Vars(r)
-
-	//get id from url params
+	//task id in url
 	taskId, err := strconv.Atoi(vars["id"])
-
-	//begin transaction
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
 	}
-	//begin statement
-	stmt, err := tx.Prepare("delete from Task where Task.id = ?")
+	stmt, err := tx.Prepare("DELETE FROM Task WHERE Task.id = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
-	//close statement
 	defer stmt.Close()
-
-	//execute statement with taskid
 	_, err = stmt.Exec(taskId)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//commit transaction
 	tx.Commit()
-
 }
 
 func main() {
-
-	//views
+	//Views
 	Router.HandleFunc("/", Home)
 
 	//API
-
 	//task
-
 	s := Router.PathPrefix("/task").Subrouter()
 	s.HandleFunc("/", CreateTask).Methods("PUT").Name("CreateTaskUrl")
 	s.HandleFunc("/{id:[0-9]+}/", UpdateTask).Methods("POST").Name("UpdateTaskUrl")
 	s.HandleFunc("/", ViewAllTasks).Methods("GET").Name("ViewAllTasksUrl")
 	s.HandleFunc("/{id:[0-9]+}/", ViewTask).Methods("GET").Name("ViewTaskUrl")
 	s.HandleFunc("/{id:[0-9]+}/", DeleteTask).Methods("DELETE").Name("DeleteTaskUrl")
-
 	//static files
 	fs := http.FileServer(http.Dir("views/static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	http.Handle("/", Router)
-
 	log.Fatal(http.ListenAndServe(":8080", nil))
-
 	db.Close()
-
 }
