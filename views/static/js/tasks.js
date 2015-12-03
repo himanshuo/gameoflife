@@ -5,31 +5,40 @@
 //			taskdescription
 //			other task stuff
 
+var React = require('react');
+var ReactDOM = require('react-dom');
+
 var TaskList = React.createClass({
 	displayName: 'TaskList',
 	render: function(){
 		return (
-			React.createElement(
-				'div', 
-				{className: "tasklist"},
-				"!!HOW DO WE USE SOME OTHER VARIABLE????!!"
-			)
-		)
+			<div className="tasklist">
+				<TaskBox />
+				<TaskBox />
+				<TaskBox />
+				<TaskBox />
+			</div>	
+		);
 	}
 });
+
+
 
 var TaskBox = React.createClass({displayName: 'TaskBox',
   render: function(){
     return (
-      React.createElement('div', {className: "commentBox"},
-        "Hello, world! I am a CommentBox."
-      )
+      	<div className="taskbox">
+      		Contents of TaskBox
+      	</div>      
     );
   }
 });
 
 
+
+
+
 ReactDOM.render(
-  React.createElement(TaskBox, null),
+<TaskList />,
   document.getElementById('content')
 );
