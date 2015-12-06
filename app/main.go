@@ -1,4 +1,4 @@
-package main
+package app
 
 //_ is in order to import a package solely for its side-effects at initialization.
 //In this case, go-sqlite3's side effects are allowing sqlite3 to be usable as a
@@ -232,7 +232,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	tx.Commit()
 }
 
-func main() {
+func Run() {
 	//Views
 	Router.HandleFunc("/", Home)
 
