@@ -72,7 +72,7 @@ func startDB() error {
 
 // Home page view. For now, simply lists all the tasks one by one.
 func Home(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Home Screen Opened")
+	log.Printf("Home Screen Opened!")
 	//get all tasks
 	rows, err := db.Query("SELECT id, name FROM Task;")
 	if err != nil {
