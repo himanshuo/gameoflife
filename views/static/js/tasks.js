@@ -16,12 +16,14 @@ var data = [
 var TaskList = React.createClass({
 	displayName: 'TaskList',
 	render: function(){
+		var taskBoxes = this.props.data.map(function(task){
+			return (
+				<TaskBox name={task.name} desc={task.desc} />
+			);
+		});
 		return (
 			<div className="tasklist">
-				<TaskBox />
-				<TaskBox />
-				<TaskBox />
-				<TaskBox />
+			{taskBoxes}
 			</div>	
 		);
 	}
@@ -33,7 +35,13 @@ var TaskBox = React.createClass({displayName: 'TaskBox',
   render: function(){
     return (
       	<div className="taskbox">
-      		This is a taskbox.
+      		<div className="name">
+      			{this.props.name}
+      		</div>
+      		<div className="desc">
+      			{this.props.desc}
+
+      		</div>
       	</div>      
     );
   }
@@ -44,6 +52,6 @@ var TaskBox = React.createClass({displayName: 'TaskBox',
 
 
 ReactDOM.render(
-<TaskList />,
+<TaskList data={data} />,
   document.getElementById('content')
 );

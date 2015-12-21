@@ -18937,30 +18937,39 @@ var ReactDOM = require('react-dom');
 var data = [{ id: 1, name: "Pete Hunt", desc: "This is one comment" }, { id: 2, name: "Jordan Walke", desc: "This is *another* comment" }];
 
 var TaskList = React.createClass({
-		displayName: 'TaskList',
-		render: function () {
-				return React.createElement(
-						'div',
-						{ className: 'tasklist' },
-						React.createElement(TaskBox, null),
-						React.createElement(TaskBox, null),
-						React.createElement(TaskBox, null),
-						React.createElement(TaskBox, null)
-				);
-		}
+  displayName: 'TaskList',
+  render: function () {
+    var taskBoxes = this.props.data.map(function (task) {
+      return React.createElement(TaskBox, { name: task.name, desc: task.desc });
+    });
+    return React.createElement(
+      'div',
+      { className: 'tasklist' },
+      taskBoxes
+    );
+  }
 });
 
 var TaskBox = React.createClass({ displayName: 'TaskBox',
-		render: function () {
-				return React.createElement(
-						'div',
-						{ className: 'taskbox' },
-						'This is a taskbox.'
-				);
-		}
+  render: function () {
+    return React.createElement(
+      'div',
+      { className: 'taskbox' },
+      React.createElement(
+        'div',
+        { className: 'name' },
+        this.props.name
+      ),
+      React.createElement(
+        'div',
+        { className: 'desc' },
+        this.props.desc
+      )
+    );
+  }
 });
 
-ReactDOM.render(React.createElement(TaskList, null), document.getElementById('content'));
+ReactDOM.render(React.createElement(TaskList, { data: data }), document.getElementById('content'));
 
 },{"react":157,"react-dom":1}],159:[function(require,module,exports){
 // shim for using process in browser
