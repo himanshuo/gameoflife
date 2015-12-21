@@ -18934,13 +18934,13 @@ module.exports = require('./lib/React');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-var data = [{ id: 1, name: "Pete Hunt", desc: "This is one comment" }, { id: 2, name: "Jordan Walke", desc: "This is *another* comment" }];
+data = [{ "id": 0, "name": "hi" }, { "id": 0, "name": "my" }, { "id": 0, "name": "nm" }, { "id": 0, "name": "asfd" }, { "id": 0, "name": "asdf" }, { "id": 0, "name": "fd" }, { "id": 0, "name": "asdfadf" }, { "id": 0, "name": "l" }, { "id": 0, "name": "asdf" }, { "id": 0, "name": "asdfadsfLAST" }];
 
 var TaskList = React.createClass({
   displayName: 'TaskList',
   render: function () {
     var taskBoxes = this.props.data.map(function (task) {
-      return React.createElement(TaskBox, { name: task.name, desc: task.desc });
+      return React.createElement(TaskBox, { id: task.id, name: task.name });
     });
     return React.createElement(
       'div',
@@ -18957,17 +18957,19 @@ var TaskBox = React.createClass({ displayName: 'TaskBox',
       { className: 'taskbox' },
       React.createElement(
         'div',
-        { className: 'name' },
-        this.props.name
+        { className: 'id' },
+        this.props.id
       ),
       React.createElement(
         'div',
-        { className: 'desc' },
-        this.props.desc
+        { className: 'name' },
+        this.props.name
       )
     );
   }
 });
+
+//"localhost:8080/task/"
 
 ReactDOM.render(React.createElement(TaskList, { data: data }), document.getElementById('content'));
 
