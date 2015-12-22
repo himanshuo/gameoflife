@@ -18934,44 +18934,66 @@ module.exports = require('./lib/React');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-data = [{ "id": 0, "name": "hi" }, { "id": 0, "name": "my" }, { "id": 0, "name": "nm" }, { "id": 0, "name": "asfd" }, { "id": 0, "name": "asdf" }, { "id": 0, "name": "fd" }, { "id": 0, "name": "asdfadf" }, { "id": 0, "name": "l" }, { "id": 0, "name": "asdf" }, { "id": 0, "name": "asdfadsfLAST" }];
-
 var TaskList = React.createClass({
-  displayName: 'TaskList',
-  render: function () {
-    var taskBoxes = this.props.data.map(function (task) {
-      return React.createElement(TaskBox, { id: task.id, name: task.name });
-    });
-    return React.createElement(
-      'div',
-      { className: 'tasklist' },
-      taskBoxes
-    );
-  }
+	displayName: 'TaskList',
+	getInitialState: function () {
+		return { data: [] };
+	},
+	getAllTasks: function () {
+		$.ajax({
+			url: this.props.url,
+			dataType: 'json',
+			cache: false,
+			success: (function (data) {
+				this.setState({ data: data });
+			}).bind(this),
+			error: (function (xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}).bind(this)
+		});
+	},
+	componentDidMount: function () {
+		this.getAllTasks();
+		setInterval(this.getAllTasks, this.props.pollInterval);
+	},
+	render: function () {
+		var taskBoxes = this.state.data.map(function (task) {
+			return React.createElement(TaskBox, { id: task.id, name: task.name });
+		});
+		return React.createElement(
+			'div',
+			{ className: 'tasklist' },
+			taskBoxes
+		);
+	}
 });
 
 var TaskBox = React.createClass({ displayName: 'TaskBox',
-  render: function () {
-    return React.createElement(
-      'div',
-      { className: 'taskbox' },
-      React.createElement(
-        'div',
-        { className: 'id' },
-        this.props.id
-      ),
-      React.createElement(
-        'div',
-        { className: 'name' },
-        this.props.name
-      )
-    );
-  }
+	render: function () {
+		return React.createElement(
+			'div',
+			{ className: 'taskbox' },
+			React.createElement(
+				'div',
+				{ className: 'id' },
+				this.props.id
+			),
+			React.createElement(
+				'div',
+				{ className: 'name' },
+				this.props.name
+			)
+		);
+	}
 });
 
-//"localhost:8080/task/"
+var TaskSection = React.createClass({ displayName: "TaskSection",
+	render: function () {
+		return React.createElement(TaskList, { url: '/task/', pollInterval: 2000 });
+	}
+});
 
-ReactDOM.render(React.createElement(TaskList, { data: data }), document.getElementById('content'));
+ReactDOM.render(React.createElement(TaskSection, null), document.getElementById('content'));
 
 },{"react":157,"react-dom":1}],159:[function(require,module,exports){
 // shim for using process in browser
