@@ -93,6 +93,23 @@ func deleteTask(t *testing.T, task models.Task) {
 	checkError(t, err)
 }
 
+//helper to get all tasks
+func getAllTasks(t *testing.T) []models.Task {
+	resp, err := http.Get("http://localhost:8080/task/")
+	if err!= nil{
+		t.Errorf("getAllTasks failed: %s", resp.Body)
+	}
+	readTasks := make([]models.Task)
+	for {
+		readTask := models.Tasks{}
+		err = json.NewDecoder(resp.Body).Decode(&readTask)
+		checkError(t, err)
+		readTasks = append(readTasks, readTask)
+	}
+	
+
+}
+
 //test all crud options
 func TestCRUDTasks(t *testing.T) {
 	task := createTask(t, "Test Task 1")
@@ -103,6 +120,16 @@ func TestCRUDTasks(t *testing.T) {
 	deleteTask(t, task)
 }
 
+//empty tasks do not show
+func TestViewAllTasks(t *testing.T){
+
+	task := createTask(t, "Test Task 1")
+	readTask(t, task)
+	task.Name = "Test Task 2"
+	task = updateTask(t, task)
+	readTask(t, task)
+	deleteTask(t, task)
+}
 // func TestCreateTasksWithSameName(t *testing.T){
 // 	resp,err := http.Get("http://localhost:8080/")
 // 	if err != nil{
