@@ -18987,9 +18987,57 @@ var TaskBox = React.createClass({ displayName: 'TaskBox',
 	}
 });
 
+var TaskCreationForm = React.createClass({
+	displayName: 'TaskCreationForm',
+
+	getInitialState: function () {
+		return { name: "" };
+	},
+	handleNameChange: function (e) {
+		this.setState({ name: e.target.value });
+	},
+	createTask: function (e) {
+		$.ajax({
+			type: "POST",
+			url: this.props.url,
+			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+			data: "name=" + this.state.name,
+			cache: false,
+			success: (function (data) {
+				console.log(this.state.name + " created");
+			}).bind(this),
+			error: (function (xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}).bind(this)
+		});
+	},
+	handleSubmit: function (e) {
+		e.preventDefault();
+		var name = this.state.name.trim();
+		if (!name) {
+			return;
+		}
+		this.createTask();
+		this.setState({ name: "" });
+	},
+	render: function () {
+		return React.createElement(
+			'form',
+			{ className: 'taskCreationForm', onSubmit: this.handleSubmit },
+			React.createElement('input', { type: 'text', placeholder: 'Task Name', value: this.state.name, onChange: this.handleNameChange }),
+			React.createElement('input', { type: 'submit', value: 'Post' })
+		);
+	}
+});
+
 var TaskSection = React.createClass({ displayName: "TaskSection",
 	render: function () {
-		return React.createElement(TaskList, { url: '/task/', pollInterval: 2000 });
+		return React.createElement(
+			'div',
+			{ className: 'taskSection' },
+			React.createElement(TaskList, { url: '/task/', pollInterval: 2000 }),
+			React.createElement(TaskCreationForm, null)
+		);
 	}
 });
 
