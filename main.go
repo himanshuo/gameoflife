@@ -195,7 +195,7 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	tasks := make([]models.Task, 10)
+	tasks := make([]models.Task, 0,10)
 	for rows.Next() {
 		var id int
 		var name string

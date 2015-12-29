@@ -10,6 +10,15 @@ import (
 	"testing"
 )
 
+//helper function to reset database
+func resetDB(t *testing.T){
+	//todo: this should be done in a better way
+	allTasks := getAllTasks(t)
+	for _, task  := range allTasks{
+		deleteTask(t, task)
+	}
+}
+
 //helper function in order to check errors
 func checkError(t *testing.T, err error) {
 	if err != nil {
@@ -93,6 +102,17 @@ func deleteTask(t *testing.T, task models.Task) {
 	checkError(t, err)
 }
 
+//helper to get all tasks
+func getAllTasks(t *testing.T) []models.Task {
+	resp, err := http.Get("http://localhost:8080/task/")
+	if err!= nil{
+		t.Errorf("getAllTasks failed: %s", resp.Body)
+	}
+	readTasks := make([]models.Task, 0)
+	err = json.NewDecoder(resp.Body).Decode(&readTasks)
+	return readTasks
+}
+
 //test all crud options
 func TestCRUDTasks(t *testing.T) {
 	task := createTask(t, "Test Task 1")
@@ -101,6 +121,24 @@ func TestCRUDTasks(t *testing.T) {
 	task = updateTask(t, task)
 	readTask(t, task)
 	deleteTask(t, task)
+}
+
+//0 to 31 tasks created
+func TestViewAllTasks(t *testing.T){
+	resetDB(t)
+	originalTasks := getAllTasks(t)
+	if len(originalTasks) != 0 {
+		t.Errorf("TestViewAllTasks: should have no tasks but has %d", len(originalTasks))
+	}
+	
+	for i :=1; i< 32; i++{
+		tName := fmt.Sprintf("Test Task %d", i)
+		createTask(t, tName)
+		curTasks := getAllTasks(t)
+		if(len(curTasks) != i){
+			t.Errorf("TestViewAllTasks: Expected %d tasks, but there were %d", i, len(curTasks))
+		}
+	}
 }
 
 // func TestCreateTasksWithSameName(t *testing.T){
