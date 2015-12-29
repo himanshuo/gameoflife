@@ -18972,7 +18972,7 @@ var TaskBox = React.createClass({ displayName: 'TaskBox',
 	render: function () {
 		return React.createElement(
 			'div',
-			{ className: 'taskbox', border: '1px' },
+			{ className: 'taskbox' },
 			React.createElement(
 				'div',
 				{ className: 'id' },
@@ -18981,7 +18981,11 @@ var TaskBox = React.createClass({ displayName: 'TaskBox',
 			React.createElement(
 				'div',
 				{ className: 'name' },
-				this.props.name
+				React.createElement(
+					'a',
+					{ href: 'http://www.google.com' },
+					this.props.name
+				)
 			)
 		);
 	}

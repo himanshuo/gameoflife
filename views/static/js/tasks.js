@@ -54,8 +54,8 @@ var TaskBox = React.createClass({displayName: 'TaskBox',
       		<div className="id">
       			{this.props.id}
       		</div>
-      		<div className="name" href="www.google.com">
-      			{this.props.name}
+      		<div className="name">
+      			<a  href="http://www.google.com">{this.props.name}</a>
 
       		</div>
       	</div>      
