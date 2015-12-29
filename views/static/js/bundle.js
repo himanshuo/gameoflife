@@ -18972,7 +18972,7 @@ var TaskBox = React.createClass({ displayName: 'TaskBox',
 	render: function () {
 		return React.createElement(
 			'div',
-			{ className: 'taskbox' },
+			{ className: 'taskbox', border: '1px' },
 			React.createElement(
 				'div',
 				{ className: 'id' },
@@ -18996,15 +18996,17 @@ var TaskCreationForm = React.createClass({
 	handleNameChange: function (e) {
 		this.setState({ name: e.target.value });
 	},
-	createTask: function (e) {
+	createTask: function (name) {
+		//todo: add sprintf
 		$.ajax({
-			type: "POST",
+			type: "PUT",
 			url: this.props.url,
 			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-			data: "name=" + this.state.name,
+			data: "name=" + name, // todo: how to properly append
 			cache: false,
 			success: (function (data) {
-				console.log(this.state.name + " created");
+				var newTask = JSON.parse(data);
+				console.log("new task created: " + newTask.name + " :" + newTask.id);
 			}).bind(this),
 			error: (function (xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
@@ -19017,7 +19019,7 @@ var TaskCreationForm = React.createClass({
 		if (!name) {
 			return;
 		}
-		this.createTask();
+		this.createTask(name);
 		this.setState({ name: "" });
 	},
 	render: function () {
@@ -19036,7 +19038,7 @@ var TaskSection = React.createClass({ displayName: "TaskSection",
 			'div',
 			{ className: 'taskSection' },
 			React.createElement(TaskList, { url: '/task/', pollInterval: 2000 }),
-			React.createElement(TaskCreationForm, null)
+			React.createElement(TaskCreationForm, { url: '/task/' })
 		);
 	}
 });

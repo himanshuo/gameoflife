@@ -50,11 +50,11 @@ var TaskList = React.createClass({
 var TaskBox = React.createClass({displayName: 'TaskBox',
   render: function(){
     return (
-      	<div className="taskbox">
+      	<div className="taskbox" >
       		<div className="id">
       			{this.props.id}
       		</div>
-      		<div className="name">
+      		<div className="name" href="www.google.com">
       			{this.props.name}
 
       		</div>
@@ -71,15 +71,17 @@ var TaskCreationForm = React.createClass({
   handleNameChange: function(e){
   	this.setState({name: e.target.value});
   },
-  createTask: function(e){
+  createTask: function(name){	
+  	//todo: add sprintf
   	$.ajax({
-		type:"POST",
+		type:"PUT",
 		url: this.props.url,
 		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-		data: "name="+this.state.name,
+		data: "name="+name, // todo: how to properly append
 		cache:false,
 		success: function(data){
-			console.log(this.state.name + " created");
+			var newTask = JSON.parse(data);
+			console.log("new task created: "+newTask.name+" :"+newTask.id);
 		}.bind(this),
 		error: function(xhr, status, err){
 			console.error(this.props.url, status, err.toString());
@@ -92,7 +94,7 @@ var TaskCreationForm = React.createClass({
   	if(!name){
   		return;
   	}
-  	this.createTask();
+  	this.createTask(name);
   	this.setState({name: ""});
   },
   render: function() {
@@ -110,7 +112,7 @@ var TaskSection = React.createClass({displayName:"TaskSection",
 		return(
 			<div className="taskSection">
 				<TaskList url="/task/" pollInterval={2000} />	
-				<TaskCreationForm />
+				<TaskCreationForm url="/task/" />
 			</div>
 		);
 	}
