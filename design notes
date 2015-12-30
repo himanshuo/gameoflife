@@ -65,7 +65,46 @@ Current Requirements
 		* github
 		* google calendar
 * add new goal page
-	* 
+	* choose goal name, picture, color
 * <goal> page
+	* ability to edit name, picture, color of goal
+	* line chart showing achievement completion for goal
+	* area chart shows progress of this goal over time
+		* y axis is achievement points
+		* x axis is time (weeks, for now)
+		* remove dropdown 'Actions' button, for now
+	* notifications panel -> Tasks
+		* pic, name, sorted by time
+		* ! in red for overdue tasks
+		* ! in yellow for tasks due today
+		* view all tasks (goes to tasks tab)
+		* add button to add new tasks
+	* history of tasks that accomplish this goal
 * add new task page
+	* name
+	* description
+	* acceptance criteria
+	* failure criterria
+	* deadline
+	* achivement points to be earned or lost
+	* subtasks
+		* pie chart showing completion of subtasks
+			* option to show subtasks by points
+			* option to show subtasks by number of subtasks
+	* goals
 * task page
+	* name
+	* description
+	* acceptance criteria
+	* failure criterria
+	* deadline
+	* achivement points to be earned or lost
+	* subtasks
+		* pie chart showing completion of subtasks
+			* option to show subtasks by points
+			* option to show subtasks by number of subtasks
+	* goals
+	* progress
+	* recurring checkbox
+	* finish button
+	* failed button 
