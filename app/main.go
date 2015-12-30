@@ -13,18 +13,13 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"github.com/himanshuo/gameoflife/settings"
 )
 
 var db *sql.DB
 var Router *mux.Router
 
-const (
-	DB_TYPE = "sqlite3"
-	DB_DIR  = "./data/data.db"
-)
-const (
-	BASE_TEMPLATE = "views/static/templates/base.html"
-)
+
 
 //start database and create a url router
 func init() {
@@ -40,7 +35,7 @@ func init() {
 //set global db variable
 func startDB() error {
 	var err error
-	if db, err = sql.Open(DB_TYPE, DB_DIR); err != nil {
+	if db, err = sql.Open(settings.DB_TYPE, settings.DB_DIR); err != nil {
 		return err
 	}
 	//make sure we can actually query the database.
@@ -90,7 +85,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		curTask := models.Task{Id: id, Name: name}
 		tasks = append(tasks, curTask)
 	}
-	t, err := template.ParseFiles(BASE_TEMPLATE)
+	t, err := template.ParseFiles(settings.BASE_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
 	}
