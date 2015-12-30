@@ -33,7 +33,3 @@ Player
 	viewOpenTasks()
 	finishTask(Task) - Task.finish()->boolean success. If success += Achievement else -= 
 	updateTask(Task, Progress.NEW_STATUS)
-
-
-
-s
