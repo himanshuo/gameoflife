@@ -8,18 +8,16 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/himanshuo/gameoflife/models"
+	"github.com/himanshuo/gameoflife/settings"
 	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
-	"github.com/himanshuo/gameoflife/settings"
 )
 
 var db *sql.DB
 var Router *mux.Router
-
-
 
 //start database and create a url router
 func init() {
@@ -190,7 +188,7 @@ func ViewAllTasks(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	defer rows.Close()
-	tasks := make([]models.Task, 0,10)
+	tasks := make([]models.Task, 0, 10)
 	for rows.Next() {
 		var id int
 		var name string
