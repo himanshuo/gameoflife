@@ -48,6 +48,37 @@ var TaskList = React.createClass({
 
 
 var TaskBox = React.createClass({displayName: 'TaskBox',
+  handleNameChange: function(e){
+  	this.setState({name: e.target.value});
+  },
+  updateTask: function(id, name){	
+  	//todo: add sprintf
+  	console.log("name="+name);
+  	console.log(this.props.url+id);
+  	$.ajax({
+		type:"POST",
+		url: "/task/"+this.props.id+"/",
+		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+		data: "name="+name, // todo: how to properly append
+		cache:false,
+		success: function(data){
+			console.log("task updated: "+data);
+		}.bind(this),
+		error: function(xhr, status, err){
+			console.error(this.props.url, status, err.toString());
+		}.bind(this)
+		});
+  },
+  handleSubmit: function(e){
+  	e.preventDefault();
+  	var name = this.state.name.trim();
+  	if(!name){
+  		return;
+  	}
+  	this.updateTask(this.props.id, name);
+  	this.setState({name: ""});
+  },
+
   render: function(){
     return (
       	<div className="taskbox" >
@@ -55,8 +86,14 @@ var TaskBox = React.createClass({displayName: 'TaskBox',
       			{this.props.id}
       		</div>
       		<div className="name">
-      			<a  href="http://www.google.com">{this.props.name}</a>
+      			<a  href={"/task/"+this.props.id}>{this.props.name}</a>
 
+      		</div>
+      		<div className="edit">
+      			<form className="taskEditForm" onSubmit={this.handleSubmit}>
+        				<input type="text" placeholder="Updated Task Name"  onChange={this.handleNameChange} />
+        				<input type="submit" value="Edit Task" />
+      			</form>
       		</div>
       	</div>      
     );

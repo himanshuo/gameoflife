@@ -18935,116 +18935,157 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var TaskList = React.createClass({
-	displayName: 'TaskList',
-	getInitialState: function () {
-		return { data: [] };
-	},
-	getAllTasks: function () {
-		$.ajax({
-			url: this.props.url,
-			dataType: 'json',
-			cache: false,
-			success: (function (data) {
-				this.setState({ data: data });
-			}).bind(this),
-			error: (function (xhr, status, err) {
-				console.error(this.props.url, status, err.toString());
-			}).bind(this)
-		});
-	},
-	componentDidMount: function () {
-		this.getAllTasks();
-		setInterval(this.getAllTasks, this.props.pollInterval);
-	},
-	render: function () {
-		var taskBoxes = this.state.data.map(function (task) {
-			return React.createElement(TaskBox, { id: task.id, name: task.name });
-		});
-		return React.createElement(
-			'div',
-			{ className: 'tasklist' },
-			taskBoxes
-		);
-	}
+  displayName: 'TaskList',
+  getInitialState: function () {
+    return { data: [] };
+  },
+  getAllTasks: function () {
+    $.ajax({
+      url: this.props.url,
+      dataType: 'json',
+      cache: false,
+      success: (function (data) {
+        this.setState({ data: data });
+      }).bind(this),
+      error: (function (xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }).bind(this)
+    });
+  },
+  componentDidMount: function () {
+    this.getAllTasks();
+    setInterval(this.getAllTasks, this.props.pollInterval);
+  },
+  render: function () {
+    var taskBoxes = this.state.data.map(function (task) {
+      return React.createElement(TaskBox, { id: task.id, name: task.name });
+    });
+    return React.createElement(
+      'div',
+      { className: 'tasklist' },
+      taskBoxes
+    );
+  }
 });
 
 var TaskBox = React.createClass({ displayName: 'TaskBox',
-	render: function () {
-		return React.createElement(
-			'div',
-			{ className: 'taskbox' },
-			React.createElement(
-				'div',
-				{ className: 'id' },
-				this.props.id
-			),
-			React.createElement(
-				'div',
-				{ className: 'name' },
-				React.createElement(
-					'a',
-					{ href: 'http://www.google.com' },
-					this.props.name
-				)
-			)
-		);
-	}
+  handleNameChange: function (e) {
+    this.setState({ name: e.target.value });
+  },
+  updateTask: function (id, name) {
+    //todo: add sprintf
+    console.log("name=" + name);
+    console.log(this.props.url + id);
+    $.ajax({
+      type: "POST",
+      url: "/task/" + this.props.id + "/",
+      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+      data: "name=" + name, // todo: how to properly append
+      cache: false,
+      success: (function (data) {
+        console.log("task updated: " + data);
+      }).bind(this),
+      error: (function (xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }).bind(this)
+    });
+  },
+  handleSubmit: function (e) {
+    e.preventDefault();
+    var name = this.state.name.trim();
+    if (!name) {
+      return;
+    }
+    this.updateTask(this.props.id, name);
+    this.setState({ name: "" });
+  },
+
+  render: function () {
+    return React.createElement(
+      'div',
+      { className: 'taskbox' },
+      React.createElement(
+        'div',
+        { className: 'id' },
+        this.props.id
+      ),
+      React.createElement(
+        'div',
+        { className: 'name' },
+        React.createElement(
+          'a',
+          { href: "/task/" + this.props.id },
+          this.props.name
+        )
+      ),
+      React.createElement(
+        'div',
+        { className: 'edit' },
+        React.createElement(
+          'form',
+          { className: 'taskEditForm', onSubmit: this.handleSubmit },
+          React.createElement('input', { type: 'text', placeholder: 'Updated Task Name', onChange: this.handleNameChange }),
+          React.createElement('input', { type: 'submit', value: 'Edit Task' })
+        )
+      )
+    );
+  }
 });
 
 var TaskCreationForm = React.createClass({
-	displayName: 'TaskCreationForm',
+  displayName: 'TaskCreationForm',
 
-	getInitialState: function () {
-		return { name: "" };
-	},
-	handleNameChange: function (e) {
-		this.setState({ name: e.target.value });
-	},
-	createTask: function (name) {
-		//todo: add sprintf
-		$.ajax({
-			type: "PUT",
-			url: this.props.url,
-			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-			data: "name=" + name, // todo: how to properly append
-			cache: false,
-			success: (function (data) {
-				var newTask = JSON.parse(data);
-				console.log("new task created: " + newTask.name + " :" + newTask.id);
-			}).bind(this),
-			error: (function (xhr, status, err) {
-				console.error(this.props.url, status, err.toString());
-			}).bind(this)
-		});
-	},
-	handleSubmit: function (e) {
-		e.preventDefault();
-		var name = this.state.name.trim();
-		if (!name) {
-			return;
-		}
-		this.createTask(name);
-		this.setState({ name: "" });
-	},
-	render: function () {
-		return React.createElement(
-			'form',
-			{ className: 'taskCreationForm', onSubmit: this.handleSubmit },
-			React.createElement('input', { type: 'text', placeholder: 'Task Name', value: this.state.name, onChange: this.handleNameChange }),
-			React.createElement('input', { type: 'submit', value: 'Post' })
-		);
-	}
+  getInitialState: function () {
+    return { name: "" };
+  },
+  handleNameChange: function (e) {
+    this.setState({ name: e.target.value });
+  },
+  createTask: function (name) {
+    //todo: add sprintf
+    $.ajax({
+      type: "PUT",
+      url: this.props.url,
+      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+      data: "name=" + name, // todo: how to properly append
+      cache: false,
+      success: (function (data) {
+        var newTask = JSON.parse(data);
+        console.log("new task created: " + newTask.name + " :" + newTask.id);
+      }).bind(this),
+      error: (function (xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }).bind(this)
+    });
+  },
+  handleSubmit: function (e) {
+    e.preventDefault();
+    var name = this.state.name.trim();
+    if (!name) {
+      return;
+    }
+    this.createTask(name);
+    this.setState({ name: "" });
+  },
+  render: function () {
+    return React.createElement(
+      'form',
+      { className: 'taskCreationForm', onSubmit: this.handleSubmit },
+      React.createElement('input', { type: 'text', placeholder: 'Task Name', value: this.state.name, onChange: this.handleNameChange }),
+      React.createElement('input', { type: 'submit', value: 'Post' })
+    );
+  }
 });
 
 var TaskSection = React.createClass({ displayName: "TaskSection",
-	render: function () {
-		return React.createElement(
-			'div',
-			{ className: 'taskSection' },
-			React.createElement(TaskList, { url: '/task/', pollInterval: 2000 }),
-			React.createElement(TaskCreationForm, { url: '/task/' })
-		);
-	}
+  render: function () {
+    return React.createElement(
+      'div',
+      { className: 'taskSection' },
+      React.createElement(TaskList, { url: '/task/', pollInterval: 2000 }),
+      React.createElement(TaskCreationForm, { url: '/task/' })
+    );
+  }
 });
 
 ReactDOM.render(React.createElement(TaskSection, null), document.getElementById('content'));
