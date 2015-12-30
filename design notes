@@ -1,0 +1,110 @@
+Things to Display
+===========
+* current tasks
+* a way to add more tasks - NOT the ability to add more tasks on the front page though since that is 
+* questions that allow the system to determine whether you have completed recurrsing tasks or not
+* Himanshu points
+* Achievement points
+* A way to see things in the backlog of tasks to do. Only a small portion. Perhaps just the tasks that have deadlines comming up.
+ 
+
+Thoughts
+========
+* title can be in 
+* The reason sublime text is so awesome is partially because it is able to display lots of information at the same time.
+* Another reason sublime text is awesome is the skinny font.
+* I tried looking at other options for designs on sublime text, I ended up choosing this current one. Why?
+* There should not be too many tasks shown in the frontpage. There is should not be too little. The goal is to show that work is being done (more tasks) but that it is not overwhelming (less tasks). ~ 5 tasks is enough to show. Consider that these tasks are NOT small tasks.
+* I was thinking that a rows of tasks should appear. HOWEVER, considering that I am only showing 5 tasks, do we need rows? Perhaps summary CARDS is what I need.
+* I am thinking about a very light white mellow background. The cards (which are rectangular but with VERY round edges) should NOT have a border. They just fade into the background. 
+* I like the long skinny waterbottles. Why? They are sleek and sexy. Rectangles should be long and thin. How does life make sense here? Less meat. More clarity.
+* Thinking about the long skinny rectanges, I don't think it will look good.
+ 
+
+Goals of Design
+===========
+* minimalistic - show only info that needs to be shown
+* clarity - life is complex. This game makes it simple.
+* should not have to give titles to things. It should be clear what things are just by looking at them
+* seperation lines are BAD. We want NATAURAL organization
+
+
+Current Requirements
+===========
+* Going to use bootstrap dashboard template (http://ironsummitmedia.github.io/startbootstrap-sb-admin-2/pages/index.html)
+* Each goal is assigned a picture and a color
+* Key changes to make to dashboard page:
+	* title -> Game of <Me>
+	* "Dashboard" -> Achievement Points <num_achievement_pts>
+	* 1 card for each goal
+		* picture of goal
+		* number is achievement points for that goal
+		* color of goal
+	* area chart shows progress of each goal over time
+		* y axis is achievement points
+		* x axis is time (weeks, for now)
+		* remove dropdown 'Actions' button, for now
+	* notifications panel -> Tasks
+		* pic, name, sorted by time
+		* ! in red for overdue tasks
+		* ! in yellow for tasks due today
+		* view all tasks (goes to tasks tab)
+		* add button to add new tasks
+	* remove bar chart, donut chart
+	* can add a github chart
+	* change timeline to be timeline of tasks completed
+	* potentially add a google calander here
+* sidebar
+	* home
+	* goals
+		* 1 submenu item for each goal
+		* + for adding a new goal
+	* tasks
+	* settings
+	* Integrations
+		* github
+		* google calendar
+* add new goal page
+	* choose goal name, picture, color
+* <goal> page
+	* ability to edit name, picture, color of goal
+	* line chart showing achievement completion for goal
+	* area chart shows progress of this goal over time
+		* y axis is achievement points
+		* x axis is time (weeks, for now)
+		* remove dropdown 'Actions' button, for now
+	* notifications panel -> Tasks
+		* pic, name, sorted by time
+		* ! in red for overdue tasks
+		* ! in yellow for tasks due today
+		* view all tasks (goes to tasks tab)
+		* add button to add new tasks
+	* history of tasks that accomplish this goal
+* add new task page
+	* name
+	* description
+	* acceptance criteria
+	* failure criterria
+	* deadline
+	* achivement points to be earned or lost
+	* subtasks
+		* pie chart showing completion of subtasks
+			* option to show subtasks by points
+			* option to show subtasks by number of subtasks
+	* goals
+* task page
+	* name
+	* description
+	* acceptance criteria
+	* failure criterria
+	* deadline
+	* achivement points to be earned or lost
+	* subtasks
+		* pie chart showing completion of subtasks
+			* option to show subtasks by points
+			* option to show subtasks by number of subtasks
+	* goals
+	* progress
+	* recurring checkbox
+	* finish button
+	* failed button 
