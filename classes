@@ -21,10 +21,11 @@ Task
 		can raise TaskUnfinished Exception
 Goals
 	Text
+	Color
+	Picture(probably going to use github icons)
 Player
 	Name
 	Achiement Points
-	Himanshu Points
 	Fun Cards
 	Tasks
 	Goals
@@ -35,3 +36,4 @@ Player
 
 
 
+s
