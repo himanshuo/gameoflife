@@ -19,6 +19,8 @@ Task
 	Recurring boolean
 	finish() - asks if acceptance/failure criteria met. checks deadline. checks subtasks. recursively calls on subtasks(). set progress to done.
 		can raise TaskUnfinished Exception
+
+	When a task becomes active, it MUST have a deadline. 
 Goals
 	Text
 	Color

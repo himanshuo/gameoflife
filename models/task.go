@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+
 type Task struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
@@ -21,6 +22,8 @@ type Task struct {
 	Recurring bool `json:"recurring"`
 	RecurStart JSONTime `json:"recurStart"`
 	RecurEnd JSONTime `json:"recurEnd"`
-	//todo: handle interval
-	RecurInterval  `json:"recurInterval"`
+	//time.Duration is just int64
+	//todo: unclear whether json conversion handles Duration->int64->string
+	//todo: if not, will have to make marshal and unmarshal functions as for JSONtime
+	RecurInterval  time.Duration `json:"recurInterval"`
 }
