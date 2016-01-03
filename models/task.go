@@ -2,8 +2,8 @@ package models
 
 import (
 	"time"
-	"encoding/json"
-	"strconv"
+//	"encoding/json"
+//	"strconv"
 )
 
 
@@ -18,7 +18,8 @@ type Task struct {
 	AcceptTime time.Time `json:"acceptTime"`
 	AchievementPoints int `json:"achievementPoints"`
 	//SubTasks is a list NOT a set because the order of the subtasks can matter
-	SubTasks []*Task `json:"subtasks"`
+	//ignoring subtasks in json conversions
+	SubTasks []*Task `json:"-"`
 	Goals []*Goal `json:"goals"`
 	Progress Progress `json:"progress"`
 	//todo: handle recurring in a smart way
@@ -59,14 +60,6 @@ func (t * Task) Equals(other * Task) bool{
 	if t.AchievementPoints != other.AchievementPoints {
 		return false
 	}
-	if len(t.SubTasks) != len(other.SubTasks){
-		return false
-	}
-	for i, _ := range t.SubTasks{
-		if !t.SubTasks[i].Equals(other.SubTasks[i]){
-			return false
-		}
-	}
 	if len(t.Goals) != len(other.Goals){
 		return false
 	}
@@ -93,101 +86,17 @@ func (t * Task) Equals(other * Task) bool{
 	return true
 }
 
-
-
-func (t *Task) MarshalJSON() ([]byte, error) {
-	data := map[string]string{}
-	data["id"] = strconv.Itoa(t.Id)
-	data["name"] = t.Name
-	data["description"] = t.Description
-	data["failureCriteria"] = t.FailureCriteria
-	data["acceptanceCriteria"] = t.AcceptanceCriteria
-	if deadline, err := json.Marshal(t.Deadline); err != nil {
-		return nil, err
-	} else {
-		data["deadline"] = string(deadline)
+func (t * Task) EqualsRecursive(other * Task) bool{
+	if !t.Equals(other){
+		return false
 	}
-	if failTime, err := json.Marshal(t.FailTime); err != nil {
-		return nil, err
-	} else {
-		data["failTime"] = string(failTime)
+	if len(t.SubTasks) != len(other.SubTasks){
+		return false
 	}
-	if acceptTime, err := json.Marshal(t.AcceptTime); err != nil {
-		return nil, err
-	} else {
-		data["acceptTime"] = string(acceptTime)
+	for i, _ := range t.SubTasks{
+		if !t.SubTasks[i].EqualsRecursive(other.SubTasks[i]){
+			return false
+		}
 	}
-	data["achievementPoints"] = strconv.Itoa(t.AchievementPoints)
-	//todo: figure out how you're going to serialize subtasks
-	data["subtasks"] = "[]"
-	if goals, err := json.Marshal(t.Goals); err != nil {
-		return nil, err
-	} else {
-		data["goals"] = string(goals)
-	}
-	data["progress"] = progressValues[t.Progress]
-	data["recurring"] = strconv.FormatBool(t.Recurring)
-	if recurStart, err := json.Marshal(t.RecurStart); err != nil {
-		return nil, err
-	} else {
-		data["recurStart"] = string(recurStart)
-	}
-	if recurEnd, err := json.Marshal(t.RecurEnd); err != nil {
-		return nil, err
-	} else {
-		data["recurEnd"] = string(recurEnd)
-	}
-	if recurInterval, err := json.Marshal(t.RecurInterval); err != nil {
-		return nil, err
-	} else {
-		data["recurInterval"] = string(recurInterval)
-	}
-
-	return json.Marshal(data)
-}
-
-func (t *Task) UnmarshalJSON(b []byte) error {
-	var f map[string]interface{}
-	if err := json.Unmarshal(b, &f); err != nil {
-		return err
-	}
-	var deadline time.Time
-	var recurStart time.Time
-	var recurEnd time.Time
-
-	if err := json.Unmarshal(f["deadline"], deadline); err != nil {
-		return err
-	}
-	if err := json.Unmarshal(f["recurStart"], recurStart); err != nil {
-		return err
-	}
-	if err := json.Unmarshal(f["recurEnd"], recurEnd); err != nil {
-		return err
-	}
-	temp, err := strconv.ParseInt(s, 10, 64)
-	if err != nil {
-    		return err
-	}
-	recurInterval := time.Duration(temp)
-
-	newTask := Task{
-		Id: strconv.Atoi(f["id"]),
-		Name: f["name"],
-		Description: f["description"],
-		FailureCriteria: f["failureCriteria"],
-		Deadline: deadline,
-		AchievementPoints: strconv.Atoi(f["achievementPoints"]),
-		//todo: subtasks
-		SubTasks:f["subtasks"],
-		//Goals:f["goals"],
-		//Progress:f["progress"],
-		Recurring:strconv.ParseBool(f["recurring"]),
-		RecurStart:recurStart,
-		RecurEnd:recurEnd,
-		RecurInterval: recurInterval,
-	}
-
-	*t = newTask
-
-	return nil
+	return true
 }
