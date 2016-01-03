@@ -4,24 +4,32 @@ import (
 	"time"
 //	"encoding/json"
 //	"strconv"
+	//"fmt"
 )
 
 
 type Task struct {
+	//Required
 	Id   int    `json:"id"`
 	Name string `json:"name"`
 	Description string `json:"description"`
 	FailureCriteria string `json:"failureCriteria"`
 	AcceptanceCriteria string `json:"acceptanceCriteria"`
+	AchievementPoints int `json:"achievementPoints"`
+	Goals []*Goal `json:"goals"`
+	Progress Progress `json:"progress"`
+
+	//Required if Active
 	Deadline time.Time `json:"deadline"`
 	FailTime time.Time `json:"failTime"`
 	AcceptTime time.Time `json:"acceptTime"`
-	AchievementPoints int `json:"achievementPoints"`
+
+	//optional
+
 	//SubTasks is a list NOT a set because the order of the subtasks can matter
 	//ignoring subtasks in json conversions
 	SubTasks []*Task `json:"-"`
-	Goals []*Goal `json:"goals"`
-	Progress Progress `json:"progress"`
+
 	//todo: handle recurring in a smart way
 	Recurring bool `json:"recurring"`
 	RecurStart time.Time `json:"recurStart"`
@@ -32,7 +40,49 @@ type Task struct {
 	RecurInterval  time.Duration `json:"recurInterval"`
 }
 
+
+func NewTask(id int, name string, desc string, failureCriteria string, acceptanceCriteria string, achievementPoints int, goals []*Goal) *Task {
+    if id < 0 {
+        return nil
+    }
+		if name == "" || desc == ""{
+			return nil
+		}
+		if failureCriteria == "" || acceptanceCriteria == "" {
+			return nil
+		}
+		if achievementPoints < 0 {
+			return nil
+		}
+		if len(goals) == 0 {
+			return nil
+		}
+
+		timeZeroValue := time.Time{}
+		return &Task{
+			Id: id,
+			Name: name,
+			Description: desc,
+			FailureCriteria: failureCriteria,
+			Deadline: timeZeroValue,
+			FailTime: timeZeroValue,
+			AcceptTime: timeZeroValue,
+			AchievementPoints: achievementPoints,
+			SubTasks: make([]*Task, 0),
+			Goals:goals,
+			Progress: OPEN,
+			Recurring:false,
+			RecurStart:timeZeroValue,
+			RecurEnd:timeZeroValue,
+			RecurInterval: 0,
+		}
+}
+
+
 func (t * Task) Equals(other * Task) bool{
+	if other == nil {
+		return false
+	}
 	if t.Id != other.Id {
 		return false
 	}
