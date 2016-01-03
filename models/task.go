@@ -13,9 +13,9 @@ type Task struct {
 	Description string `json:"description"`
 	FailureCriteria string `json:"failureCriteria"`
 	AcceptanceCriteria string `json:"acceptanceCriteria"`
-	Deadline time.Time `json:"deadline"` 
-	FailTime time.Time `json:"failTime"` 
-	AcceptTime time.Time `json:"acceptTime"` 
+	Deadline time.Time `json:"deadline"`
+	FailTime time.Time `json:"failTime"`
+	AcceptTime time.Time `json:"acceptTime"`
 	AchievementPoints int `json:"achievementPoints"`
 	//SubTasks is a list NOT a set because the order of the subtasks can matter
 	SubTasks []*Task `json:"subtasks"`
@@ -141,25 +141,53 @@ func (t *Task) MarshalJSON() ([]byte, error) {
 		return nil, err
 	} else {
 		data["recurInterval"] = string(recurInterval)
-	} 
+	}
 
-	return json.Marshal(data) 
+	return json.Marshal(data)
 }
 
-// func (t *JSONTime) UnmarshalJSON(b []byte) error {
-// 	//use the []byte as a string
-// 	//convert string to integer Unix time
-// 	ts, err := strconv.Atoi(string(b))
-// 	if err != nil {
-// 		return err
-// 	}
-// 	//convert the unix time from int to int64
-// 	//convert int64 unix time into local time.
-// 	//0 sec offset from epoch
-// 	*t = JSONTime(time.Unix(int64(ts), 0))
+func (t *Task) UnmarshalJSON(b []byte) error {
+	var f map[string]interface{}
+	if err := json.Unmarshal(b, &f); err != nil {
+		return err
+	}
+	var deadline time.Time
+	var recurStart time.Time
+	var recurEnd time.Time
 
-// 	return nil
-// }
+	if err := json.Unmarshal(f["deadline"], deadline); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(f["recurStart"], recurStart); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(f["recurEnd"], recurEnd); err != nil {
+		return err
+	}
+	temp, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+    		return err
+	}
+	recurInterval := time.Duration(temp)
 
+	newTask := Task{
+		Id: strconv.Atoi(f["id"]),
+		Name: f["name"],
+		Description: f["description"],
+		FailureCriteria: f["failureCriteria"],
+		Deadline: deadline,
+		AchievementPoints: strconv.Atoi(f["achievementPoints"]),
+		//todo: subtasks
+		SubTasks:f["subtasks"],
+		//Goals:f["goals"],
+		//Progress:f["progress"],
+		Recurring:strconv.ParseBool(f["recurring"]),
+		RecurStart:recurStart,
+		RecurEnd:recurEnd,
+		RecurInterval: recurInterval,
+	}
 
+	*t = newTask
 
+	return nil
+}
