@@ -1,1 +1,32 @@
-FAIL	command-line-arguments [build failed]
+type Task struct {
+	//Required
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Description string `json:"description"`
+	FailureCriteria string `json:"failureCriteria"`
+	AcceptanceCriteria string `json:"acceptanceCriteria"`
+	AchievementPoints int `json:"achievementPoints"`
+	//list not set because prioritize goals
+	Goals []*Goal `json:"goals"`
+	Progress Progress `json:"progress"`
+
+	//Required if Active
+	Deadline time.Time `json:"deadline"`
+	FailTime time.Time `json:"failTime"`
+	AcceptTime time.Time `json:"acceptTime"`
+
+	//optional
+
+	//SubTasks is a list NOT a set because the order of the subtasks can matter
+	//ignoring subtasks in json conversions
+	SubTasks []*Task `json:"-"`
+
+	//todo: handle recurring in a smart way
+	Recurring bool `json:"recurring"`
+	RecurStart time.Time `json:"recurStart"`
+	RecurEnd time.Time `json:"recurEnd"`
+	//time.Duration is just int64
+	//todo: unclear whether json conversion handles Duration->int64->string
+	//todo: if not, will have to make marshal and unmarshal functions as for JSONtime
+	RecurInterval  time.Duration `json:"recurInterval"`
+}

@@ -5,6 +5,7 @@ import (
 //	"encoding/json"
 //	"strconv"
 	//"fmt"
+	"errors"
 )
 
 
@@ -16,6 +17,7 @@ type Task struct {
 	FailureCriteria string `json:"failureCriteria"`
 	AcceptanceCriteria string `json:"acceptanceCriteria"`
 	AchievementPoints int `json:"achievementPoints"`
+	//list not set because prioritize goals
 	Goals []*Goal `json:"goals"`
 	Progress Progress `json:"progress"`
 
@@ -150,3 +152,12 @@ func (t * Task) EqualsRecursive(other * Task) bool{
 	}
 	return true
 }
+
+// func (t * Task) StartWorking(d time.Time) error{
+// 	if d >= time.Now(){
+// 		errors.new("Already passed deadline")
+// 	}
+// 	t.Deadline = d
+// 	t.Progress = WORKING
+// 	return nil
+// }
