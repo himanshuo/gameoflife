@@ -1,0 +1,11 @@
+- [ ] create db tables for goals, tasks, player, fun cards
+- [ ] write queries to create db tables
+- [ ] query: given goal, give me all tasks
+- [ ] query: given player, give me all goals
+- [ ] query: given player, give me all tasks
+- [ ] query: add a goal for a player
+- [ ] query: add a task for a goal
+- [ ] query: update the total points for a player
+- [ ] query: update total points for a goal
+- [ ] query: delete task
+- [ ] query: delete goal
