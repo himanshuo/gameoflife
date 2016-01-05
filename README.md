@@ -1,5 +1,4 @@
-# gameoflife
-The Game of Life
+# The Game of life
 [![Build Status](https://travis-ci.org/himanshuo/gameoflife.svg?branch=develop)](https://travis-ci.org/himanshuo/gameoflife)
 
 Game is defined on:
