@@ -31,7 +31,7 @@ Goals of Design
 
 Current Requirements
 ===========
-* Going to use bootstrap dashboard template (http://ironsummitmedia.github.io/startbootstrap-sb-admin-2/pages/index.html)
+* Going to use bootstrap dashboard template (http://blackrockdigital.github.io/startbootstrap-sb-admin-2/pages/index.html)
 * Each goal is assigned a picture and a color
 * Key changes to make to dashboard page:
 	* title -> Game of <Me>
